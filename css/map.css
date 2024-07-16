@@ -8,7 +8,7 @@
 
 #taiwanMap{
   width: 900px;
-  height: 1200px;
+  height: 800px;
 }
 
 .county {
@@ -18,11 +18,11 @@
 }
 
 .county:hover {
-  fill: lightgray;
+  fill: var(--primary);
 }
 
 .county.selected {
-  fill: red;
+  fill: var(--highlight);
 }
 
 .test{
