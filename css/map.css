@@ -1,35 +1,70 @@
 /* 記得把背景色拿掉 */
 #map-container {
-  background-color: var(--secondary);
+  /* background-color: var(--secondary); */
   width: 1000px;
   height: 800px;
   margin: 10px;
 }
 
 #taiwanMap{
-  width: 900px;
+  width: 1000px;
   height: 800px;
 }
 
 .county {
-  fill: #ebf0e4;
-  stroke: gray;
+  fill: var(--dark);
+  stroke: var(--dark);
   stroke-width: 0.1px;
+  cursor: pointer;
+}
+
+/*移除點擊效果*/
+.county,
+.county-label
+{
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;       /*關閉點擊效果*/
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background-color: transparent;
+  color: inherit;
+  outline: none;
 }
 
 .county:hover {
-  fill: var(--primary);
+  fill: var(--light);
 }
 
 .county.selected {
   fill: var(--highlight);
 }
 
-.test{
-    background-color: blueviolet;
-    color: aliceblue;
-    width: 20px;
-    height: 20px;
-    padding: 5px;
-    font-size: 10px;
+.custom_tooltip {
+  position: absolute;
+  text-align: left;
+  width: max-content;
+  padding: 10px;
+  font: 10px;
+  background: #f0eeeb;
+  color: var(--dark);
+  border: 1px solid var(--dark);
+  border-radius: 3px;
+  pointer-events: none;
 }
+
+.county-label{
+  fill: var(--light);
+  font-weight: 700;
+}
+
+.bar{
+  /* display: inline-block; */
+  width: 20px;
+  /* height: 75px; */
+  margin-right: 3px;
+  background-color: RoyalBlue;
+
+    }
