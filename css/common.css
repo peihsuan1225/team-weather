@@ -1,7 +1,7 @@
-/* 整體字體：英文字-Roboto 中文字-Noto Sans TC */
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+/* 整體字體：英文字-Roboto 中文字-LXGW WenKai TC */
+@import url("https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@300;400;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 
-/* 顏色統一在這邊 使用時 var(--顏色名) */
+/* 顏色統一在這邊 使用時打 var(--顏色名) */
 :root {
   --light: #f8f8f8;
   --primary: #efe6e4;
@@ -15,7 +15,7 @@
   padding: 0;
   box-sizing: border-box;
   color: var(--dark);
-  font-family: "Roboto", "Noto Sans TC", sans-serif;
+  font-family: "Roboto", "LXGW WenKai TC", sans-serif;
 }
 
 body {
@@ -49,8 +49,34 @@ body {
   gap: 5px;
 }
 
-.nav_logo_container img {
-  width: 35px;
+.logo_wrapper {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.logo_wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: logoAnimation 3s ease-in-out infinite;
+}
+
+@keyframes logoAnimation {
+  0%,
+  100% {
+    transform: scale(0.8) rotate(0);
+  }
+  50% {
+    transform: scale(1.2) rotate(120deg);
+  }
+}
+
+.nav_logo_container:hover .logo_wrapper img {
+  animation-play-state: paused;
 }
 
 main {
@@ -66,6 +92,10 @@ main {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
+}
+
+.city_selector {
+  display: none;
 }
 
 footer {
@@ -101,8 +131,12 @@ footer {
   color: var(--secondary);
 }
 
+.city_selector {
+  display: none;
+}
+
 /* RWD */
-@media screen and (max-width: 1040px) {
+@media screen and (max-width: 1200px) {
   .main_container {
     width: 100%;
   }
@@ -121,6 +155,25 @@ footer {
     justify-content: center;
   }
 
+  .weather_location {
+    display: none;
+  }
+
+  .city_selector {
+    display: block;
+    min-width: 100px;
+    height: 30px;
+    font-size: 20px;
+    font-weight: 700;
+    border: 1px solid var(--secondary);
+    background-color: var(--light);
+    border-radius: 3px;
+  }
+
+  .city_selector:focus {
+    outline: none;
+  }
+
   #map-container {
     display: none;
   }
@@ -128,6 +181,5 @@ footer {
   .weather_and_rain_container {
     width: 95%;
     min-height: 400px;
-    border: 1px solid red;
   }
 }

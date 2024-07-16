@@ -31,7 +31,7 @@
 
 .weather_location {
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .weather_date {
@@ -119,6 +119,7 @@
   color: var(--dark);
   padding: 8px 20px;
   letter-spacing: 2px;
+  font-size: 15px;
 }
 
 .page_selector_btn:hover {
@@ -127,5 +128,5 @@
   color: var(--light);
   border-radius: 30px;
   padding: 8px 25px;
-  font-weight: 600;
+  font-weight: 700;
 }
