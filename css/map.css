@@ -5,3 +5,31 @@
   height: 800px;
   margin: 10px;
 }
+
+#taiwanMap{
+  width: 900px;
+  height: 1200px;
+}
+
+.county {
+  fill: #ebf0e4;
+  stroke: gray;
+  stroke-width: 0.1px;
+}
+
+.county:hover {
+  fill: lightgray;
+}
+
+.county.selected {
+  fill: red;
+}
+
+.test{
+    background-color: blueviolet;
+    color: aliceblue;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    font-size: 10px;
+}
