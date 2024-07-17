@@ -1,0 +1,48 @@
+.rain_info_container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.rain_info {
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  height: 70px;
+  align-items: center;
+  border-bottom: 0.5px solid var(--secondary);
+}
+
+.rain_info:hover {
+  width: 100%;
+  background-color: rgba(188, 172, 170, 0.1);
+}
+
+.rain_info_station {
+  width: 80px;
+  text-align: center;
+}
+
+.rain_info_mm {
+  width: 60px;
+  text-align: center;
+}
+
+.rain_info_bar_container {
+  display: flex;
+  align-items: center;
+}
+
+.rain_info_bar {
+  height: 12px;
+  display: flex;
+  align-items: end;
+  gap: 1px;
+}
+
+.color_box {
+  width: 8px;
+}
