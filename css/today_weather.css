@@ -30,8 +30,8 @@
 }
 
 .weather_location {
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 23px;
+  font-weight: 700;
 }
 
 .weather_date {
@@ -74,6 +74,8 @@
 
 .weather_description {
   letter-spacing: 1.5px;
+  font-size: 20px;
+  font-weight: 400;
 }
 
 .weather_wind_and_rain {
@@ -119,6 +121,7 @@
   color: var(--dark);
   padding: 8px 20px;
   letter-spacing: 2px;
+  font-size: 15px;
 }
 
 .page_selector_btn:hover {
@@ -127,5 +130,5 @@
   color: var(--light);
   border-radius: 30px;
   padding: 8px 25px;
-  font-weight: 600;
+  font-weight: 700;
 }
