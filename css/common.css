@@ -8,6 +8,10 @@
   --dark: #77615e;
   --highlight: #ad5349;
   --secondary: #bcacaa;
+
+  /* dark mode */
+  --dark-mode-background: rgba(202, 211, 216, 0.6);
+  --dark-mode-text: #918584;
 }
 
 * {

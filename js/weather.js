@@ -273,6 +273,7 @@ async function fetchWeatherData(countyName) {
 
 // 匯出更新天氣資料
 export async function updateWeatherForCounty(countyName) {
+  console.log(countyName);
   const result = await fetchWeatherData(countyName);
   if (!result) return;
   displayWeather(result);
@@ -282,7 +283,12 @@ export async function updateWeatherForCounty(countyName) {
 export async function initWeather() {
   //初始化載入默認城市
   const defaultCity = "臺北市";
-  // const result = await fetchWeatherData(defaultCity);
+  if (state) {
+    const result = await fetchWeatherData(defaultCity);
+  } else {
+    // const result = await fetchWeatherData(defaultCity);
+  }
+
   displayWeather(testData);
 
   //監聽城市選擇事件(只有在手機版才會出現)

@@ -2,7 +2,7 @@
   padding: 10px;
   border-radius: 15px;
   margin: 10px;
-  width: 380px;
+  min-width: 380px;
   height: 800px;
   background-color: var(--light);
   border: 1px solid var(--secondary);
@@ -180,7 +180,6 @@
 
 .week_weather_info_icon {
   width: 40px;
-  flex: 0.4;
 }
 
 .week_weather_info_temp {
