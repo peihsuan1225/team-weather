@@ -7,10 +7,12 @@ from decimal import Decimal, ROUND_HALF_UP
 
 router = APIRouter()
 
+
 def get_date(days_offset=0):
     tz = timezone(timedelta(hours=+8))
     date = datetime.now(tz) + timedelta(days=days_offset)
     return date.strftime('%Y-%m-%d')
+
 
 def get_values(official_response, location_name, element_code):
     values = []
@@ -31,6 +33,7 @@ def get_values(official_response, location_name, element_code):
             values.insert(0, None)
     return values
 
+
 def get_avg_value(official_response, location_name, element_code):
     values = []
     special_process = ["WS", "UVI", "Wx", "WeatherDescription"]
@@ -42,13 +45,15 @@ def get_avg_value(official_response, location_name, element_code):
                         for time in weatherElement["time"]:
                             for elementValue in time["elementValue"]:
                                 if element_code not in special_process:
-                                    values.append(Decimal(elementValue["value"]))
+                                    values.append(
+                                        Decimal(elementValue["value"]))
                                 elif element_code == "WS":
                                     if elementValue["measures"] == "公尺/秒":
-                                        values.append(Decimal(elementValue["value"]))
+                                        values.append(
+                                            Decimal(elementValue["value"]))
                                 elif element_code in ["UVI", "Wx", "WeatherDescription"]:
                                     values.append(elementValue["value"])
-                                    
+
     if element_code in ["UVI", "Wx", "WeatherDescription"]:
         if len(values) == 2:
             values.insert(0, None)
@@ -69,23 +74,26 @@ def get_avg_value(official_response, location_name, element_code):
         return int(rounded_value)
     else:
         return None
-    
+
+
 @router.get("/api/daily/forecast/{locationName}")
 async def get_forecast(locationName: str):
-    locationNames = ["新竹縣", "金門縣", "苗栗縣", "新北市", "宜蘭縣", "雲林縣", "臺南市", "高雄市", "彰化縣", "臺北市", "南投縣", "澎湖縣", "基隆市", "桃園市", "花蓮縣", "連江縣", "臺東縣", "嘉義市", "嘉義縣", "屏東縣", "臺中市", "新竹市"]
-    
+    locationNames = ["新竹縣", "金門縣", "苗栗縣", "新北市", "宜蘭縣", "雲林縣", "臺南市", "高雄市", "彰化縣", "臺北市",
+                     "南投縣", "澎湖縣", "基隆市", "桃園市", "花蓮縣", "連江縣", "臺東縣", "嘉義市", "嘉義縣", "屏東縣", "臺中市", "新竹市"]
+
     if locationName not in locationNames:
         result = {
             "error": True,
             "message": "locationName not exist"
         }
-        return JSONResponse(content = result, status_code=400)
+        return JSONResponse(content=result, status_code=400)
     try:
         elements = "T,MinT,UVI,MaxT,PoP12h,Wx,WeatherDescription,WS"
         date = get_date()
         timeFrom = date + "T00:00:00"
         timeTo = get_date(days_offset=1) + "T00:00:00"
-        url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
+        url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={
+            elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
         x = requests.get(url)
         official_response = json.loads(x.text)
         # print(official_response)
@@ -97,7 +105,8 @@ async def get_forecast(locationName: str):
         avg_WS = get_avg_value(official_response, locationName, "WS")
         UVI = get_avg_value(official_response, locationName, "UVI")
         Wx = get_avg_value(official_response, locationName, "Wx")
-        WeatherDescription = get_avg_value(official_response, locationName, "WeatherDescription")
+        WeatherDescription = get_avg_value(
+            official_response, locationName, "WeatherDescription")
 
         if UVI[0] == None:
             UVI[0] = UVI[0]
@@ -112,45 +121,45 @@ async def get_forecast(locationName: str):
         print(WeatherDescription)
 
         response_data = {
-            "result":{
+            "result": {
                 "locationName": locationName,
-                "weatherElements":[
+                "weatherElements": [
                     {
                         "date": date,
-                        "weatherElement":[
+                        "weatherElement": [
                             {
-                                "avgTemp":{
-                                "value": avg_temp,
-                                "measures": "攝氏度"
+                                "avgTemp": {
+                                    "value": avg_temp,
+                                    "measures": "攝氏度"
                                 }
                             },
                             {
-                                "Mintemp":{
+                                "Mintemp": {
                                     "value": min_temp,
                                     "measures": "攝氏度"
                                 }
                             },
                             {
-                                "MaxTemp":{
+                                "MaxTemp": {
                                     "value": max_temp,
                                     "measures": "攝氏度"
                                 }
                             },
                             {
-                                "avgPoP":{
+                                "avgPoP": {
                                     "value": avg_PoP,
                                     "measures": "百分比"
                                 }
                             },
                             {
-                                "avgWS":{
+                                "avgWS": {
                                     "value": avg_WS,
                                     "measures": "公尺/秒"
                                 }
                             },
-                            
+
                             {
-                                "UVI":[
+                                "UVI": [
                                     {
                                         "value": UVI[0],
                                         "measures": "紫外線指數"
@@ -162,7 +171,7 @@ async def get_forecast(locationName: str):
                                 ]
                             },
                             {
-                                "Wx":[
+                                "Wx": [
                                     {
                                         "time": "daytime",
                                         "value": Wx[0],
@@ -176,7 +185,7 @@ async def get_forecast(locationName: str):
                                 ]
                             },
                             {
-                                "WeatherDescription":[
+                                "WeatherDescription": [
                                     {
                                         "time": "daytime",
                                         "value": WeatherDescription[0]
@@ -188,42 +197,45 @@ async def get_forecast(locationName: str):
                                 ]
                             }
                         ]
-                    } 
-                ]        
+                    }
+                ]
             }
         }
         response = JSONResponse(content=response_data, status_code=200)
 
     except Exception as e:
-        response_data = {"error": True, "message":str(e)}
+        response_data = {"error": True, "message": str(e)}
         response = JSONResponse(content=response_data, status_code=500)
 
     return response
 
+
 @router.get("/api/weekly/forecast/{locationName}")
 async def get_forecast(locationName: str):
-    locationNames = ["新竹縣", "金門縣", "苗栗縣", "新北市", "宜蘭縣", "雲林縣", "臺南市", "高雄市", "彰化縣", "臺北市", "南投縣", "澎湖縣", "基隆市", "桃園市", "花蓮縣", "連江縣", "臺東縣", "嘉義市", "嘉義縣", "屏東縣", "臺中市", "新竹市"]
+    locationNames = ["新竹縣", "金門縣", "苗栗縣", "新北市", "宜蘭縣", "雲林縣", "臺南市", "高雄市", "彰化縣", "臺北市",
+                     "南投縣", "澎湖縣", "基隆市", "桃園市", "花蓮縣", "連江縣", "臺東縣", "嘉義市", "嘉義縣", "屏東縣", "臺中市", "新竹市"]
 
     if locationName not in locationNames:
         result = {
             "error": True,
             "message": "locationName not exist"
         }
-        return JSONResponse(content = result, status_code=400)
+        return JSONResponse(content=result, status_code=400)
     try:
         elements = "MinT,MaxT,Wx"
         response_data = {
-            "result":{
+            "result": {
                 "locationName": locationName,
-                "weatherElement":[]
+                "weatherElement": []
             }
         }
 
         for day_offset in range(7):
-            date = get_date(days_offset = day_offset)
+            date = get_date(days_offset=day_offset)
             timeFrom = date + "T00:00:00"
-            timeTo = get_date(days_offset = day_offset + 1) + "T00:00:00"     
-            url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
+            timeTo = get_date(days_offset=day_offset + 1) + "T00:00:00"
+            url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={
+                elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
             x = requests.get(url)
             official_response = json.loads(x.text)
 
@@ -244,37 +256,37 @@ async def get_forecast(locationName: str):
             response_data["result"]["weatherElement"].append(
                 {
                     "date": date,
-                    "weatherElement":[
+                    "weatherElement": [
                         {
-                            "Mintemp":[
+                            "Mintemp": [
                                 {
                                     "time": "daytime",
-                                    "value":min_temp[0],
+                                    "value": min_temp[0],
                                     "measures": "攝氏度"
                                 },
                                 {
                                     "time": "night",
-                                    "value":int(min_temp[1]),
+                                    "value": int(min_temp[1]),
                                     "measures": "攝氏度"
                                 }
                             ]
                         },
                         {
-                            "MaxTemp":[
+                            "MaxTemp": [
                                 {
                                     "time": "daytime",
-                                    "value":max_temp[0],
+                                    "value": max_temp[0],
                                     "measures": "攝氏度"
                                 },
                                 {
                                     "time": "night",
-                                    "value":int(max_temp[1]),
+                                    "value": int(max_temp[1]),
                                     "measures": "攝氏度"
                                 }
                             ]
                         },
                         {
-                            "Wx":[
+                            "Wx": [
                                 {
                                     "time": "daytime",
                                     "value": Wx[0],
@@ -294,7 +306,7 @@ async def get_forecast(locationName: str):
         response = JSONResponse(content=response_data, status_code=200)
 
     except Exception as e:
-        response_data = {"error": True, "message":str(e)}
+        response_data = {"error": True, "message": str(e)}
         response = JSONResponse(content=response_data, status_code=500)
 
     return response

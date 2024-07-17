@@ -1,114 +1,21 @@
-const testData = {
-  result: {
-    locationName: "新北市",
-    weatherElement: [
-      {
-        date: "2024-07-16",
-        avgTemp: {
-          value: "29",
-          measures: "攝氏度",
-        },
-        Mintemp: {
-          value: "28",
-          measures: "攝氏度",
-        },
-        MaxTemp: {
-          value: "34",
-          measures: "攝氏度",
-        },
-        avgPoP: {
-          value: "20",
-          measures: "百分比",
-        },
-        avgWS: [
-          {
-            value: "2",
-            measures: "公尺/秒",
-          },
-          {
-            value: "2",
-            measures: "蒲福風級",
-          },
-        ],
-        UVI: [
-          {
-            value: "11",
-            measures: "紫外線指數",
-          },
-          {
-            value: "危險級",
-            measures: "曝曬級數",
-          },
-        ],
-        Wx: [
-          {
-            time: "6-18",
-            value: "多雲時晴",
-          },
-          {
-            time: "18-6",
-            value: "晴時多雲",
-          },
-        ],
-        WeatherDescription: [
-          {
-            time: "6-18",
-            value:
-              "多雲時晴。降雨機率 20%。溫度攝氏28至36度。舒適至易中暑。偏北風 風速2級(每秒2公尺)。相對濕度61%。",
-          },
-          {
-            time: "18-6",
-            value:
-              "晴時多雲。降雨機率 10%。溫度攝氏28至33度。舒適至悶熱。西南風 風速<= 1級(每秒2公尺)。相對濕度81%。",
-          },
-        ],
-      },
-      {
-        date: "2024-07-17",
-        weatherElement: [1, 2, 3],
-      },
-      {
-        date: "2024-07-18",
-        weatherElement: [1, 2, 3],
-      },
-      {
-        date: "2024-07-19",
-        weatherElement: [1, 2, 3],
-      },
-      {
-        date: "2024-07-20",
-        weatherElement: [1, 2, 3],
-      },
-      {
-        date: "2024-07-21",
-        weatherElement: [1, 2, 3],
-      },
-      {
-        date: "2024-07-22",
-        weatherElement: [1, 2, 3],
-      },
-    ],
-  },
-};
-
 //天氣關鍵字與 icon對照
 const weatherIconMapping = {
   // 晴空萬里
-  1: "/asset/晴空萬里.svg",
+  "01": "/asset/晴空萬里.svg",
 
   // 晴時多雲
-  2: "/asset/晴時多雲.svg",
-  3: "/asset/晴時多雲.svg",
+  "02": "/asset/晴時多雲.svg",
+  "03": "/asset/晴時多雲.svg",
 
   // 多雲時陰
-  4: "/asset/多雲時陰.svg",
-  5: "/asset/多雲時陰.svg",
-  6: "/asset/多雲時陰.svg",
-  7: "/asset/多雲時陰.svg",
+  "04": "/asset/多雲時陰.svg",
+  "05": "/asset/多雲時陰.svg",
+  "06": "/asset/多雲時陰.svg",
+  "07": "/asset/多雲時陰.svg",
 
   // 多雲短暫陣雨
-  8: "/asset/多雲短暫陣雨.svg",
-  9: "/asset/多雲短暫陣雨.svg",
+  "08": "/asset/多雲短暫陣雨.svg",
+  "09": "/asset/多雲短暫陣雨.svg",
   10: "/asset/多雲短暫陣雨.svg",
 
   // 晴短暫陣雨
@@ -130,13 +37,19 @@ const weatherIconMapping = {
   22: "/asset/晴午後短暫雷陣雨.svg",
 };
 
-function getWeatherIcon(weatherCode) {
-  // 確保 weatherCode 是字符串，並去除空白
-  const code = String(weatherCode).trim();
+function getWeatherIcon(weatherCode, isNight = false) {
+  // 將 weatherCode 轉換為字符串，去除空白，並在需要時在前面補零
+  const code = String(weatherCode).trim().padStart(2, "0");
+
+  let iconPath = weatherIconMapping[code];
 
   // 直接查找映射
   if (weatherIconMapping[code]) {
-    return weatherIconMapping[code];
+    if (isNight) {
+      iconPath = iconPath.replace("/asset/", "/asset/晚-");
+      return iconPath;
+    }
+    return iconPath;
   }
 
   // 如果都不匹配，返回默認icon
@@ -146,11 +59,28 @@ function getWeatherIcon(weatherCode) {
 
 //日期換算星期
 function getDayOfWeek(date) {
-  console.log(date);
   date = new Date(date);
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const daysOfWeek = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
   const dayIndex = date.getDay();
   return daysOfWeek[dayIndex];
+}
+
+//換算一週星期
+function getWeekDayNames(startDateStr) {
+  // 解析輸入的日期字串
+  const startDate = new Date(startDateStr);
+
+  // 計算一週的日期
+  const dayNames = [];
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+
+    let dayName = i === 0 ? "今天" : getDayOfWeek(currentDate);
+    dayNames.push(dayName);
+  }
+
+  return dayNames;
 }
 
 //動畫遞增溫度數字
@@ -159,7 +89,7 @@ function animateValue(obj, start, end, duration) {
   let startTimestamp = null;
   const step = (timestamp) => {
     if (!startTimestamp) startTimestamp = timestamp;
-    const progress = Math.min((timestamp - startTimestamp) / duration, 0.8);
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
     const currentValue = Math.round(progress * (end - start) + start);
     obj.textContent = `${currentValue}°C`;
     if (progress < 1) {
@@ -170,8 +100,13 @@ function animateValue(obj, start, end, duration) {
 }
 
 // 創建一週天氣元素
-function createWeatherElement() {
-  const container = document.createElement("div");
+function createWeatherElement(data, dayName, isNight) {
+  //整理資料
+  const { date, weatherElement } = data;
+  console.log(weatherElement);
+  const [{ Mintemp }, { MaxTemp }, { Wx }] = weatherElement;
+
+  // const container = document.createElement("div");
   const info = document.createElement("div");
   const day = document.createElement("span");
   const icon = document.createElement("img");
@@ -181,7 +116,12 @@ function createWeatherElement() {
   const tempBar = document.createElement("div");
   const maxTemp = document.createElement("span");
 
-  container.classList.add("week_weather_info_container");
+  //創建一個顯示天氣狀態的 tooltip
+  const tooltip = document.createElement("div");
+  tooltip.classList.add("tooltip");
+  console.log(tooltip);
+
+  // container.classList.add("week_weather_info_container");
   info.classList.add("week_weather_info");
   day.classList.add("week_weather_info_day");
   icon.classList.add("week_weather_info_icon");
@@ -190,6 +130,33 @@ function createWeatherElement() {
   tempBar.classList.add("week_weather_info_temp_bar");
   maxTemp.classList.add("week_weather_info_temp_max");
 
+  //設置初始數據(白天)
+  setWeather(false);
+
+  //監聽 hover事件
+  info.addEventListener("mouseenter", () => {
+    setWeather(true);
+  });
+  info.addEventListener("mouseleave", () => {
+    setWeather(false);
+  });
+
+  //檢查是白天還是夜晚，顯示相對應的資料
+  function setWeather(isNight) {
+    const timeOfDay = isNight ? "night" : "daytime";
+    const periodText = isNight ? "晚上" : "白天";
+
+    day.textContent = `${dayName}${periodText}`;
+
+    const weatherCode = Wx.find((item) => item.time === timeOfDay)?.code;
+    icon.src = getWeatherIcon(weatherCode, isNight);
+
+    const min = Mintemp.find((item) => item.time === timeOfDay)?.value;
+    minTemp.textContent = `${min}°C`;
+
+    const max = MaxTemp.find((item) => item.time === timeOfDay)?.value;
+    maxTemp.textContent = `${max}°C`;
+  }
   tempInfo.appendChild(minTemp);
   tempInfo.appendChild(tempBar);
   tempInfo.appendChild(maxTemp);
@@ -198,26 +165,59 @@ function createWeatherElement() {
   info.appendChild(icon);
   info.appendChild(tempInfo);
 
-  container.appendChild(info);
+  return info;
+}
 
-  return container;
+//顯示一週天氣資料
+function displayWeekWeather(data, isNight = false) {
+  const weatherContainer = document.querySelector(
+    ".week_weather_info_container"
+  );
+
+  console.log(weatherContainer);
+  //先清空容器
+  weatherContainer.innerHTML = "";
+
+  const { weatherElement } = data.result;
+  console.log(weatherElement);
+
+  //獲取一週的星期名稱
+  const today = weatherElement[0].date;
+  const dayNames = getWeekDayNames(today);
+
+  weatherElement.forEach((data, index) => {
+    const infoEL = createWeatherElement(data, dayNames[index], isNight);
+
+    //如果是最一個元素，拿掉下底線
+    if (index === weatherElement.length - 1) {
+      infoEL.style.borderBottom = "none";
+    }
+
+    weatherContainer.appendChild(infoEL);
+  });
 }
 
 // 顯示天氣資料
-function displayWeather(data) {
-  if (!data) return;
+function displayWeather(dayData, weekData) {
+  if (!dayData || !weekData) return;
 
   //Today Weather部分
   //擷取資料
-  const { locationName, weatherElement } = data.result;
-  const {
-    date,
-    avgTemp: { value: avgTempValue },
-    avgPoP: { value: avgPoPValue },
-    avgWS: [{ value: avgWSValue }],
-    //要改成擷取編碼
-    Wx: [{ value: wxDayValue }, { value: wxNightValue }],
-  } = weatherElement[0];
+  const { locationName, weatherElements } = dayData.result;
+
+  const { date, weatherElement } = weatherElements[0];
+  const [
+    { avgTemp },
+    { Mintemp },
+    { MaxTemp },
+    { avgPoP },
+    { avgWS },
+    { UVI },
+    { Wx },
+    { WeatherDescription },
+  ] = weatherElement;
+
+  console.log(avgPoP, avgWS, Wx, WeatherDescription);
 
   //計算目前是禮拜幾
   const dayOfWeek = getDayOfWeek(date);
@@ -233,32 +233,57 @@ function displayWeather(data) {
 
   locationEL.textContent = locationName;
   dateEL.textContent = `${date} ${dayOfWeek}`;
-  wxEL.textContent = wxDayValue;
+
+  //檢查 Wx陣列中的value是不是null，如果是null就顯示無資料
+  const validWx = Wx.find((item) => item.value !== null)?.value || "無天氣資訊";
+  wxEL.textContent = validWx;
+
   //動畫遞增溫度數字效果
   //轉成整數
-  const avgTempValueInt = parseInt(avgTempValue);
+  const avgTempValueInt = parseInt(avgTemp.value);
   animateValue(tempEL, 0, avgTempValueInt, 1000);
 
-  windEL.textContent = `WIND |  ${avgWSValue} m/s`;
-  rainEL.textContent = `RAIN |  ${avgPoPValue}%`;
+  windEL.textContent = `WIND |  ${avgWS.value} m/s`;
+  rainEL.textContent = `RAIN |  ${avgPoP.value}%`;
 
-  //用 Wx值與icon相對照
-  weatherIconEL.data = getWeatherIcon("11");
+  //用 Wx code與icon相對照
+  //檢查 Wx陣列中的code是不是null，如果是null就顯示無資料
+  const validWxCode = Wx.find((item) => item.code !== "None")?.code || "";
+  console.log(validWxCode);
+  weatherIconEL.data = getWeatherIcon(validWxCode);
 
   //顯示未來一週天氣
-  const weatherContainer = document.querySelectorAll(
-    ".week_weather_info_and_rain_info_container"
-  );
-
-  const weekWeatherEL = createWeatherElement();
-  console.log("元素:", weekWeatherEL);
+  displayWeekWeather(weekData);
 }
 
-//獲取天氣資料
-async function fetchWeatherData(countyName) {
+//獲取今日天氣資料
+async function fetchDayWeatherData(countyName) {
   try {
-    const response = await fetch(`/api/forecast/${countyName}`);
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/daily/forecast/${countyName}`
+    );
     const results = await response.json();
+
+    if (!response.ok) {
+      throw new Error(results.message);
+    }
+
+    return results;
+  } catch (error) {
+    console.log("Error: ", error);
+    return null;
+  }
+}
+
+//獲取一週天氣資料
+async function fetchWeekWeatherData(countyName) {
+  console.log("一週：", countyName);
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/weekly/forecast/${countyName}`
+    );
+    const results = await response.json();
+    console.log(results);
 
     if (!response.ok) {
       throw new Error(results.message);
@@ -274,29 +299,25 @@ async function fetchWeatherData(countyName) {
 // 匯出更新天氣資料
 export async function updateWeatherForCounty(countyName) {
   console.log(countyName);
-  const result = await fetchWeatherData(countyName);
+  const dayResult = await fetchDayWeatherData(defaultCity);
+  const weekResult = await fetchWeekWeatherData(defaultCity);
   if (!result) return;
-  displayWeather(result);
+  displayWeather(dayResult, weekResult);
 }
 
 // 匯出初始化天氣頁面
 export async function initWeather() {
   //初始化載入默認城市
   const defaultCity = "臺北市";
-  if (state) {
-    const result = await fetchWeatherData(defaultCity);
-  } else {
-    // const result = await fetchWeatherData(defaultCity);
-  }
-
-  displayWeather(testData);
+  const dayResult = await fetchDayWeatherData(defaultCity);
+  const weekResult = await fetchWeekWeatherData(defaultCity);
+  displayWeather(dayResult, weekResult);
 
   //監聽城市選擇事件(只有在手機版才會出現)
   const citySelector = document.querySelector(".city_selector");
   if (citySelector) {
     citySelector.addEventListener("change", async (e) => {
       const city = e.target.value;
-      console.log(object);
       // const result = await fetchWeatherData(city);
       // if (result) {
       //   displayWeather(result);
