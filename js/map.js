@@ -1,3 +1,5 @@
+import { updateWeatherForCounty } from './weather.js';
+
 var svg = d3.select("svg");
 
 const g = svg.append("g");
@@ -10,10 +12,8 @@ var pathGenerator = d3.geoPath().projection(projectmethod);
 d3.json("./asset/COUNTY_MOI_1090820.json")
 .then(data => {
     const geometries = topojson.feature(data, data.objects["COUNTY_MOI_1090820"])
-    console.log(geometries);
     g.append("path")
     const paths = g.selectAll("path").data(geometries.features);
-    console.log(paths);
     paths.enter()
       .append("path")
         .attr("d", pathGenerator)
@@ -22,7 +22,6 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
             onClickMap(this,d.properties["COUNTYNAME"]); // 將資料傳遞給 Onclick 函數
           })
         .on("mouseover", function(d) {
-          // console.log(d.properties["COUNTYNAME"]);
           d3.select('#tooltip').style('opacity', 1).html('<div class="custom_tooltip">縣市：' + d.properties["COUNTYNAME"] +'</div>')
         })
         .on("mousemove", function(d) {
@@ -31,10 +30,6 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
         .on("mouseout", function(d) {
           d3.select('#tooltip').style('opacity', 0)
         })
-    
-      // // 加上簡易版本 tooltip
-      // .append("title")
-      //   .text(d => d.properties["COUNTYNAME"])
   })
 
   // 加上tooltip id
@@ -44,49 +39,42 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
     .attr('style', 'position: absolute; opacity: 0;');
 
 
-  // 在地圖上顯示雨量長條圖和文字
-  function showRainfall(data_rainfall){
-    // 移除所有現有的圓圈、長條圖、文字
-    // d3.selectAll("circle").remove();
-    d3.selectAll("rect").remove();
-    d3.selectAll(".rainfall").remove();
+  // ** clearRainfall 移除地圖雨量的function
+  function clearRainfall(){
+    d3.selectAll("circle").remove();
+  }
 
-    // 試著把雨量資料畫在地圖上面
+  // ** showRainfall(雨量陣列資料) 在地圖上顯示雨量全圈
+  function showRainfall(data_rainfall){
+    clearRainfall();
+
     // 創建一個地圖投影
     var projection = d3.geoMercator().center([120.3, 24.25]).scale(12000);
 
-    g.selectAll("rect")
+    g.selectAll("circle")
       .data(data_rainfall)
       .enter()
-      .append("rect")
-        .attr("x", function(d) {
+      .append("circle")
+        .attr("cx", function(d) {
           return projection([d.StationLongitude, d.StationLatitude])[0];
         })
-        .attr("y", function(d) {
+        .attr("cy", function(d) {
           return projection([d.StationLongitude, d.StationLatitude])[1];
         })
-        .attr("width", 10)
-        .attr("height", function(d) {
-          return d.Past24hr_rainfall * 2;
-        })
-        .attr("class", "bar");
-
-    // 在每個長條圖後面加上文字顯示數值
-    g.selectAll("text")
-    .data(data_rainfall)
-    .enter()
-    .append("text")
-      .attr("x", function(d) {
-        return projection([d.StationLongitude, d.StationLatitude])[0] + 5; // 調整文字位置，假設文字要在長條圖中心
+        .attr("r",function(d) {
+            return d.Past24hr_rainfall/3;
+          })
+        .attr("fill","rgb(125, 204, 224,0.4)")
+      //觀測站的tooltip
+      .on("mouseover", function(d) {
+        d3.select('#tooltip').style('opacity', 1).html('<div class="custom_tooltip">觀測站：' + d.StationName + '<br>雨量：' + d.Past24hr_rainfall + "mm"  +'</div>')
       })
-      .attr("y", function(d) {
-        return projection([d.StationLongitude, d.StationLatitude])[1] - 5; // 調整文字位置，假設文字要放在長條圖上方
+      .on("mousemove", function(d) {
+        d3.select('#tooltip').style('left', (d3.event.pageX+10) + 'px').style('top', (d3.event.pageY+10) + 'px')
       })
-      .text(function(d) {
-        return d.StationName + "," + d.Past24hr_rainfall + "mm"; // 顯示雨量數值
+      .on("mouseout", function(d) {
+        d3.select('#tooltip').style('opacity', 0)
       })
-      .attr("class", "rainfall")
-      .attr("text-anchor", "middle") // 文字置中對齊
   }
 
 
@@ -101,39 +89,22 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
     // 為當前點擊的縣市添加選中狀態
     d3.select(element).classed("selected", true);
 
-    // 在當前點擊的縣市上顯示名稱
-    d3.select(element.parentNode)
-    .append("text")
-    .attr("class", "county-label")
-    .attr("x", function() {
-      const centroid = pathGenerator.centroid(d3.select(element).data()[0]);
-      return centroid[0];
-    })
-    .attr("y", function() {
-      const centroid = pathGenerator.centroid(d3.select(element).data()[0]);
-      return centroid[1];
-    })
-    .attr("dy", ".35em")
-    .attr("dx", "-25px")
-    .text(name);
-
-    // 移除所有現有的圓圈、長條圖、文字
-    // d3.selectAll("circle").remove();
-    d3.selectAll("rect").remove();
-    d3.selectAll(".rainfall").remove();
-
+    clearRainfall(); //清掉雨量顯示
+    console.log(name);
+    updateWeatherForCounty(name);  
+  
   }
 
-  //點擊切換雨量按鈕，出現雨量資料
-  document.querySelector("#rain_btn").addEventListener("click",function(){
-     //假裝自己撈到資料
-    let testdata = data;
-    let stations = testdata.result.rainfall_data[0].stations;
-    // console.log(stations);
+  // //點擊切換雨量按鈕，出現雨量資料(測試用)
+  // document.querySelector("#rain_btn").addEventListener("click",function(){
+  //    //假裝自己撈到資料
+  //   let testdata = data;
+  //   let stations = testdata.result.rainfall_data[0].stations;
+  //   // console.log(stations);
 
-    //畫雨量長條圖資料
-    showRainfall(stations);
-  })
+  //   //畫雨量長條圖資料
+  //   showRainfall(stations);
+  // })
 
   //測試用資料
   let data = {
@@ -187,3 +158,6 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
       ]
     }
   }
+
+
+  export{showRainfall, clearRainfall};
