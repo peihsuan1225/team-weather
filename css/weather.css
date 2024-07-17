@@ -49,8 +49,8 @@
 }
 
 .weather_icon {
-  width: 150px;
-  filter: drop-shadow(10px 3px 5px rgba(188, 172, 170, 0.2));
+  width: 160px;
+  filter: drop-shadow(10px 3px 5px rgba(188, 172, 170, 0.3));
 }
 
 .weather_icon img {
@@ -59,6 +59,7 @@
 }
 
 .weather_temp_and_info {
+  width: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -73,7 +74,9 @@
 }
 
 .weather_description {
+  margin-top: 8px;
   letter-spacing: 1.5px;
+  font-size: 18px;
 }
 
 .weather_wind_and_rain {
@@ -81,7 +84,7 @@
   margin-top: 20px;
   width: 100%;
   height: auto;
-  font-size: 12px;
+  font-size: 13px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -89,9 +92,9 @@
   gap: 5px;
 }
 
-.weather_wind,
+.weather_wind > span,
 .weather_wind i,
-.weather_rain,
+.weather_rain > span,
 .weather_rain i {
   color: var(--secondary);
 }
@@ -129,4 +132,54 @@
   border-radius: 30px;
   padding: 8px 25px;
   font-weight: 700;
+}
+
+/* 一週天氣 */
+.week_weather_info_and_rain_info_container {
+  border: 1px solid orange;
+  width: 100%;
+  height: 100%;
+}
+
+.week_weather_info_container {
+  border: 1px solid red;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.week_weather_info {
+  border: 1px solid blue;
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 20px;
+  height: 70px;
+  align-items: center;
+  border-bottom: 0.5px solid var(--secondary);
+}
+
+.week_weather_info:hover {
+  width: 100%;
+  background-color: rgba(188, 172, 170, 0.1);
+}
+
+.week_weather_info_icon {
+  width: 40px;
+  flex: 0.4;
+}
+
+.week_weather_info_temp {
+  display: flex;
+  align-items: center;
+}
+
+.week_weather_info_temp_bar {
+  width: 80px;
+  height: 10px;
+  background: linear-gradient(to right, var(--secondary), var(--highlight));
+  border-radius: 30px;
+  margin: 0 10px;
 }

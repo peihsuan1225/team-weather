@@ -89,9 +89,9 @@ main {
   width: 90%;
   margin-top: 50px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
-  padding: 20px;
+  padding: 20px 10px;
 }
 
 .city_selector {
@@ -132,6 +132,10 @@ footer {
 }
 
 .city_selector {
+  display: none;
+}
+
+.hide {
   display: none;
 }
 

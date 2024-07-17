@@ -8,8 +8,13 @@
     <!-- 建立整體樣式指導：基礎字型、字體、基底色、標題、段落樣式等等 -->
     <link rel="stylesheet" href="css/common.css" />
     <link rel="stylesheet" href="/css/map.css">
-    <link rel="stylesheet" href="/css/today_weather.css">
-    <link rel="stylesheet" href="/css/week_weather.css">
+    <link rel="stylesheet" href="/css/weather.css">
+    <!-- 引入地圖套件 -->
+    <!-- <script src="https://unpkg.com/d3@5.6.0/dist/d3.min.js"></script>
+    <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.js"></script> -->
+  
+    <!-- js檔  -->
+    <!-- <script type="module" src="/js/map.js" defer></script> -->
    
     <!-- Font Awesome -->
       <link
@@ -45,7 +50,7 @@
 
             <!-- 地區 & 日期 -->
             <div class="weather_location_and_date">
-              <span class="weather_location">台中市</span>
+              <span class="weather_location">臺北市</span>
               <select class="city_selector">
                 <option value="台北市" selected>臺北市</option>
                 <option value="基隆市">基隆市</option>
@@ -82,14 +87,14 @@
 
                 <!-- 天氣資訊：風速 ＆ 降雨機率 -->
                 <div class="weather_wind_and_rain">
-                  <span class="weather_wind">
+                  <div class="weather_wind">
                     <i class="fa-solid fa-wind"></i>
-                    WIND | 20 Km/h
-                  </span>
-                  <span class="weather_rain">
+                    <span>WIND | 20 Km/h</span>
+                  </div>
+                  <div class="weather_rain">
                     <i class="fa-solid fa-umbrella"></i>
-                    RAIN | 10%
-                  </span>
+                    <span>RAIN | 10%</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -103,28 +108,30 @@
 
 
           <!-- Weather Info & Rain Info Section -->
-          <div class="week_weather_info_container">
-            <div class="week_weather_info">
+          <div class="week_weather_info_and_rain_info_container">
+            <div class="week_weather_info_container">
 
-              <span class="week_weather_info_day">今天</span>
-              <img class="week_weather_info_icon" src="/asset/晴空萬里.svg"></img>
+              <div class="week_weather_info">
+                <span class="week_weather_info_day">今天</span>
+                <img class="week_weather_info_icon" src="/asset/晴空萬里.svg" />
 
-              <div class="week_weather_info_temp">
-                <span class="week_weather_info_temp_min">25°</span>
-                <div class="week_weather_info_temp_bar"></div>
-                <span class="week_weather_info_temp_max">31°</span>
+                <div class="week_weather_info_temp">
+                  <span class="week_weather_info_temp_min">25°</span>
+                  <div class="week_weather_info_temp_bar"></div>
+                  <span class="week_weather_info_temp_max">31°</span>
+                </div>
               </div>
+
             </div>
-            
+            <div class="rain_info_container" ></div>
           </div>
 
-          <div class="rain_info_container"></div>
+          
         </div>
 
         <!-- Map Section -->
         <div id="map-container">
           <svg id="taiwanMap""></svg>
-          <div id="tooltip"></div>
         </div>
       </div>
     </main>
@@ -133,8 +140,10 @@
     <footer>
       <div class="footer_text">
         <p>COPYRIGHT © 2024 第一觀測站</p>
-        <p>周姵萱、童俐、李映萱、王思穎、陳暐茗</p>
       </div>
     </footer>
+
+    <script type="module" src="./js/weather.js"></script>
+    <script type="module" src="./js/main.js"></script>
   </body>
 </html>
