@@ -44,16 +44,60 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
     .attr('style', 'position: absolute; opacity: 0;');
 
 
+  // 在地圖上顯示雨量長條圖和文字
+  function showRainfall(data_rainfall){
+    // 移除所有現有的圓圈、長條圖、文字
+    // d3.selectAll("circle").remove();
+    d3.selectAll("rect").remove();
+    d3.selectAll(".rainfall").remove();
+
+    // 試著把雨量資料畫在地圖上面
+    // 創建一個地圖投影
+    var projection = d3.geoMercator().center([120.3, 24.25]).scale(12000);
+
+    g.selectAll("rect")
+      .data(data_rainfall)
+      .enter()
+      .append("rect")
+        .attr("x", function(d) {
+          return projection([d.StationLongitude, d.StationLatitude])[0];
+        })
+        .attr("y", function(d) {
+          return projection([d.StationLongitude, d.StationLatitude])[1];
+        })
+        .attr("width", 10)
+        .attr("height", function(d) {
+          return d.Past24hr_rainfall * 2;
+        })
+        .attr("class", "bar");
+
+    // 在每個長條圖後面加上文字顯示數值
+    g.selectAll("text")
+    .data(data_rainfall)
+    .enter()
+    .append("text")
+      .attr("x", function(d) {
+        return projection([d.StationLongitude, d.StationLatitude])[0] + 5; // 調整文字位置，假設文字要在長條圖中心
+      })
+      .attr("y", function(d) {
+        return projection([d.StationLongitude, d.StationLatitude])[1] - 5; // 調整文字位置，假設文字要放在長條圖上方
+      })
+      .text(function(d) {
+        return d.StationName + "," + d.Past24hr_rainfall + "mm"; // 顯示雨量數值
+      })
+      .attr("class", "rainfall")
+      .attr("text-anchor", "middle") // 文字置中對齊
+  }
+
 
   //點擊地圖後的事件
   function onClickMap(element,name){
-    console.log(name);
     document.querySelector(".county").textContent = name;
 
     // 移除所有縣市的選中狀態和名稱
     d3.selectAll(".county").classed("selected", false);
     d3.selectAll(".county-label").remove();
-
+    
     // 為當前點擊的縣市添加選中狀態
     d3.select(element).classed("selected", true);
 
@@ -73,51 +117,23 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
     .attr("dx", "-25px")
     .text(name);
 
-    //假裝自己撈到資料
+    // 移除所有現有的圓圈、長條圖、文字
+    // d3.selectAll("circle").remove();
+    d3.selectAll("rect").remove();
+    d3.selectAll(".rainfall").remove();
+
+  }
+
+  //點擊切換雨量按鈕，出現雨量資料
+  document.querySelector("#rain_btn").addEventListener("click",function(){
+     //假裝自己撈到資料
     let testdata = data;
     let stations = testdata.result.rainfall_data[0].stations;
-    console.log(stations);
+    // console.log(stations);
 
-    // 移除所有現有的圓圈
-    d3.selectAll("circle").remove();
-
-    // 試著把雨量資料畫在地圖上面
-    // 創建一個地圖投影
-    var projection = d3.geoMercator().center([120.3, 24.25]).scale(12000);
-
-    g.selectAll("rect")
-      .data(stations)
-      .enter()
-      .append("rect")
-        .attr("x", function(d) {
-          return projection([d.StationLongitude, d.StationLatitude])[0];
-        })
-        .attr("y", function(d) {
-          return projection([d.StationLongitude, d.StationLatitude])[1];
-        })
-        .attr("width", 10)
-        .attr("height", function(d) {
-          return d.Past24hr_rainfall * 2;
-        })
-        .style("fill", "blue");
-
-    // 在每個長條圖後面加上文字顯示數值
-    g.selectAll("text")
-    .data(stations)
-    .enter()
-    .append("text")
-      .attr("x", function(d) {
-        return projection([d.StationLongitude, d.StationLatitude])[0] + 5; // 調整文字位置，假設文字要在長條圖中心
-      })
-      .attr("y", function(d) {
-        return projection([d.StationLongitude, d.StationLatitude])[1] - 5; // 調整文字位置，假設文字要放在長條圖上方
-      })
-      .text(function(d) {
-        return d.StationName + "," + d.Past24hr_rainfall; // 顯示雨量數值
-      })
-      .attr("text-anchor", "middle") // 文字置中對齊
-      .style("font-size", "10px"); // 設置字體大小
-  }
+    //畫雨量長條圖資料
+    showRainfall(stations);
+  })
 
   //測試用資料
   let data = {
@@ -171,29 +187,3 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
       ]
     }
   }
-
-    // 建立縣市編號表
-    const locationName = {
-      0 : "連江縣",
-      1 : "宜蘭縣",
-      2 : "彰化縣",
-      3 : "南投縣",
-      4 : "雲林縣",
-      5 : "基隆市",
-      6 : "臺北市",
-      7 : "新北市",
-      8 : "臺中市",
-      9 : "臺南市",
-      10 : "桃園市",
-      11 : "苗栗縣",
-      12 : "嘉義市",
-      13 : "嘉義縣",
-      14 : "金門縣",
-      15 : "高雄市",
-      16 : "臺東縣",
-      17 : "花蓮縣",
-      18 : "澎湖縣",
-      19 : "新竹市",
-      20 : "新竹縣",
-      21 : "屏東縣",
-    }
