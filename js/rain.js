@@ -1,4 +1,6 @@
-function getRainData() {
+import { showRainfall } from "./map.js";
+
+function getRainData(cityName = "臺北市") {
   fetch("https://tli-gini.github.io/WeHelp-Stage-1/test/rain.json")
     .then((response) => response.json())
     .then((data) => {
@@ -6,32 +8,49 @@ function getRainData() {
       const rainResult = document.querySelector("#rainResult");
       rainResult.innerHTML = "";
 
-      data.result.rainfall_data.forEach((country) => {
-        country.stations.forEach((station, index) => {
-          const stationDiv = document.createElement("div");
-          stationDiv.className = "rain_info";
-          stationDiv.id = `station-${index}`;
-          stationDiv.innerHTML = `
-            <span class="rain_info_station">${station.StationName}</span>
-            <div class="rain_info_bar_container">
-              <div class="rain_info_bar">
-                ${generateColorBoxes()}
+      const cityData = data.result.rainfall_data.filter(
+        (city) => city.countryName === cityName
+      );
+      console.log(cityName);
+
+      // 將 station names 包成 array
+      const stationNames = [];
+
+      if (cityData.length > 0) {
+        cityData.forEach((city) => {
+          city.stations.forEach((station, index) => {
+            // Add station name to the array
+            stationNames.push(station.StationName);
+
+            const stationDiv = document.createElement("div");
+            stationDiv.className = "rain_info";
+            stationDiv.id = `station-${index}`;
+            stationDiv.innerHTML = `
+              <span class="rain_info_station">${station.StationName}</span>
+              <div class="rain_info_bar_container">
+                <div class="rain_info_bar">
+                  ${generateColorBoxes()}
+                </div>
               </div>
-            </div>
-            <div class="rain_info_mm"><span class="rain_info_number">${
-              station.Past24hr_rainfall
-            }</span> mm</div>`;
+              <div class="rain_info_mm"><span class="rain_info_number">${
+                station.Past24hr_rainfall
+              }</span> mm</div>`;
 
-          rainResult.appendChild(stationDiv);
+            rainResult.appendChild(stationDiv);
 
-          const boxes = stationDiv.querySelectorAll(".color_box");
-          applyColorsToBoxes(boxes, parseInt(station.Past24hr_rainfall, 10));
+            const boxes = stationDiv.querySelectorAll(".color_box");
+            applyColorsToBoxes(boxes, parseInt(station.Past24hr_rainfall, 10));
+          });
         });
-      });
+
+        // Call showRainfall
+        showRainfall(stationNames);
+        console.log(stationNames);
+      }
     })
     .catch((error) => {
-      console.error("Error fetching data: ", error);
-      rainResult.textContent = "Error loading data";
+      console.log("Error: ", error);
+      return null;
     });
 }
 
@@ -76,4 +95,4 @@ function applyColorsToBoxes(boxes, mmValue) {
   });
 }
 
-export { getRainData, applyColorsToBoxes, generateColorBoxes };
+export { getRainData };
