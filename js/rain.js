@@ -75,3 +75,5 @@ function applyColorsToBoxes(boxes, mmValue) {
     box.style.height = index <= thresholdIndex ? "12px" : "2px";
   });
 }
+
+export { getRainData, applyColorsToBoxes, generateColorBoxes };

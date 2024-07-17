@@ -142,12 +142,6 @@ footer {
   pointer-events: none;
 }
 
-.show {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
 /* RWD */
 @media screen and (max-width: 1200px) {
   .main_container {

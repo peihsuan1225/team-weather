@@ -286,14 +286,15 @@ export async function initWeather() {
   displayWeather(testData);
 
   //監聽城市選擇事件(只有在手機版才會出現)
-  // const citySelector = document.querySelector(".city_selector");
-  // if (citySelector) {
-  //   citySelector.addEventListener("change", async (e) => {
-  //     const city = e.target.value;
-  //     const result = await fetchWeatherData(city);
-  //     if (result) {
-  //       displayWeather(result);
-  //     }
-  //   });
-  // }
+  const citySelector = document.querySelector(".city_selector");
+  if (citySelector) {
+    citySelector.addEventListener("change", async (e) => {
+      const city = e.target.value;
+      console.log(object);
+      // const result = await fetchWeatherData(city);
+      // if (result) {
+      //   displayWeather(result);
+      // }
+    });
+  }
 }

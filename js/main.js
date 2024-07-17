@@ -1,14 +1,14 @@
 import { initWeather } from "./weather.js";
+import { getRainData } from "./rain.js";
 
 //處理天氣與雨量頁面轉換
 function handlePageSwitch() {
   const weatherBtn = document.getElementById("weather_btn");
   const rainBtn = document.getElementById("rain_btn");
   const weatherContainer = document.querySelector(
-    ".week_weather_info_and_rain_info_container"
+    ".week_weather_info_container"
   );
 
-  console.log(weatherContainer);
   const rainContainer = document.querySelector(".rain_info_container");
 
   // 預設 weather_btn clicked
@@ -17,15 +17,11 @@ function handlePageSwitch() {
   // update display of weather and rain
   function updateDisplay() {
     if (weatherBtn.classList.contains("active")) {
-      weatherContainer.classList.add("show");
-      weatherContainer.classList.remove("hide");
-      rainContainer.classList.add("hide");
-      rainContainer.classList.remove("show");
+      weatherContainer.style.display = "flex";
+      rainContainer.style.display = "none";
     } else if (rainBtn.classList.contains("active")) {
-      rainContainer.classList.add("show");
-      rainContainer.classList.remove("hide");
-      weatherContainer.classList.add("hide");
-      weatherContainer.classList.remove("show");
+      weatherContainer.style.display = "none";
+      rainContainer.style.display = "flex";
     }
   }
 
@@ -46,13 +42,11 @@ function handlePageSwitch() {
 }
 
 function initPage() {
-  //載入地圖
-
   // 載入天氣頁面
   initWeather();
 
   //載入雨量頁面
-  // getRainData();
+  getRainData();
 
   //監聽頁面轉換按鈕
   handlePageSwitch();
