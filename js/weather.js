@@ -83,6 +83,36 @@ function getWeekDayNames(startDateStr) {
   return dayNames;
 }
 
+//根據溫度範圍變化溫度數字顏色
+const getColorForTemp = (value) => {
+  let r = 0,
+    g = 0,
+    b = 0;
+  if (value < 20) {
+    // 低溫範圍：藍色到綠色
+    r = 0;
+    g = Math.floor((100 * (20 - value)) / 20);
+    b = Math.floor((200 * (20 - value)) / 20);
+  } else if (value <= 30) {
+    // 中溫範圍：綠色到黃色
+    r = Math.floor((173 * (value - 20)) / 10);
+    g = Math.floor((100 * (30 - value)) / 10) + 83;
+    b = Math.floor((73 * (value - 20)) / 10);
+  } else {
+    // 高溫範圍：黃色到紅色 (R173, G83, B73)
+    r = 173;
+    g = Math.max(83, Math.floor(173 - (90 * (value - 30)) / 20));
+    b = 73;
+  }
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+//把顏色套用進溫度數字
+const applyTemperatureColor = (element, temperature) => {
+  const color = getColorForTemp(temperature);
+  element.style.color = color;
+};
+
 //動畫遞增溫度數字
 //記得轉成整數
 function animateValue(obj, start, end, duration) {
@@ -92,8 +122,17 @@ function animateValue(obj, start, end, duration) {
     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
     const currentValue = Math.round(progress * (end - start) + start);
     obj.textContent = `${currentValue}°C`;
+
+    //更新顏色
+    const color = getColorForTemp(currentValue);
+    obj.style.color = color;
+
     if (progress < 1) {
       window.requestAnimationFrame(step);
+    } else {
+      // 確保最終值和顏色是正確的
+      obj.textContent = `${end}°C`;
+      obj.style.color = getColorForTemp(end);
     }
   };
   window.requestAnimationFrame(step);
@@ -103,7 +142,6 @@ function animateValue(obj, start, end, duration) {
 function createWeatherElement(data, dayName, isNight) {
   //整理資料
   const { date, weatherElement } = data;
-  console.log(weatherElement);
   const [{ Mintemp }, { MaxTemp }, { Wx }] = weatherElement;
 
   // const container = document.createElement("div");
@@ -115,11 +153,6 @@ function createWeatherElement(data, dayName, isNight) {
   const minTemp = document.createElement("span");
   const tempBar = document.createElement("div");
   const maxTemp = document.createElement("span");
-
-  //創建一個顯示天氣狀態的 tooltip
-  const tooltip = document.createElement("div");
-  tooltip.classList.add("tooltip");
-  console.log(tooltip);
 
   // container.classList.add("week_weather_info_container");
   info.classList.add("week_weather_info");
@@ -174,12 +207,10 @@ function displayWeekWeather(data, isNight = false) {
     ".week_weather_info_container"
   );
 
-  console.log(weatherContainer);
   //先清空容器
   weatherContainer.innerHTML = "";
 
   const { weatherElement } = data.result;
-  console.log(weatherElement);
 
   //獲取一週的星期名稱
   const today = weatherElement[0].date;
@@ -217,8 +248,6 @@ function displayWeather(dayData, weekData) {
     { WeatherDescription },
   ] = weatherElement;
 
-  console.log(avgPoP, avgWS, Wx, WeatherDescription);
-
   //計算目前是禮拜幾
   const dayOfWeek = getDayOfWeek(date);
 
@@ -230,6 +259,8 @@ function displayWeather(dayData, weekData) {
   const wxEL = document.querySelector(".weather_description");
   const windEL = document.querySelector(".weather_wind span");
   const rainEL = document.querySelector(".weather_rain span");
+  const infoContainer = document.querySelector(".weather_temp_and_info");
+  infoContainer.style.display = "flex";
 
   locationEL.textContent = locationName;
   dateEL.textContent = `${date} ${dayOfWeek}`;
@@ -249,11 +280,21 @@ function displayWeather(dayData, weekData) {
   //用 Wx code與icon相對照
   //檢查 Wx陣列中的code是不是null，如果是null就顯示無資料
   const validWxCode = Wx.find((item) => item.code !== "None")?.code || "";
-  console.log(validWxCode);
   weatherIconEL.data = getWeatherIcon(validWxCode);
 
   //顯示未來一週天氣
   displayWeekWeather(weekData);
+}
+
+//loading動畫
+function showLoading() {
+  const loadingContainer = document.querySelector(".loader");
+  loadingContainer.style.display = "block";
+}
+
+function hideLoading() {
+  const loadingContainer = document.querySelector(".loader");
+  loadingContainer.style.display = "none";
 }
 
 //獲取今日天氣資料
@@ -277,13 +318,11 @@ async function fetchDayWeatherData(countyName) {
 
 //獲取一週天氣資料
 async function fetchWeekWeatherData(countyName) {
-  console.log("一週：", countyName);
   try {
     const response = await fetch(
       `http://127.0.0.1:8000/api/weekly/forecast/${countyName}`
     );
     const results = await response.json();
-    console.log(results);
 
     if (!response.ok) {
       throw new Error(results.message);
@@ -297,20 +336,33 @@ async function fetchWeekWeatherData(countyName) {
 }
 
 // 匯出更新天氣資料
-export async function updateWeatherForCounty(countyName) {
-  console.log(countyName);
-  const dayResult = await fetchDayWeatherData(defaultCity);
-  const weekResult = await fetchWeekWeatherData(defaultCity);
-  if (!result) return;
-  displayWeather(dayResult, weekResult);
+async function updateWeatherForCounty(countyName) {
+  showLoading();
+  const weatherContainer = document.querySelector(
+    ".week_weather_info_container"
+  );
+  weatherContainer.innerHTML = "";
+
+  const newDayResult = await fetchDayWeatherData(countyName);
+  console.log("從地圖過來:", newDayResult);
+  const newWeekResult = await fetchWeekWeatherData(countyName);
+  console.log("從地圖過來:", newWeekResult);
+  if (!newDayResult || !newWeekResult) return;
+
+  hideLoading();
+  displayWeather(newDayResult, newWeekResult);
 }
 
 // 匯出初始化天氣頁面
-export async function initWeather() {
+async function initWeather() {
   //初始化載入默認城市
   const defaultCity = "臺北市";
+  showLoading();
   const dayResult = await fetchDayWeatherData(defaultCity);
   const weekResult = await fetchWeekWeatherData(defaultCity);
+
+  hideLoading();
+
   displayWeather(dayResult, weekResult);
 
   //監聽城市選擇事件(只有在手機版才會出現)
@@ -318,10 +370,13 @@ export async function initWeather() {
   if (citySelector) {
     citySelector.addEventListener("change", async (e) => {
       const city = e.target.value;
-      // const result = await fetchWeatherData(city);
-      // if (result) {
-      //   displayWeather(result);
-      // }
+      console.log(city);
+      const dayResult = await fetchDayWeatherData(city);
+      const weekResult = await fetchWeekWeatherData(city);
+      if (!dayResult || !weekResult) return;
+      displayWeather(dayResult, weekResult);
     });
   }
 }
+
+export { initWeather, updateWeatherForCounty, showLoading, hideLoading };
