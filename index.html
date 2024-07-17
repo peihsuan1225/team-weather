@@ -9,12 +9,13 @@
     <link rel="stylesheet" href="css/common.css" />
     <link rel="stylesheet" href="/css/map.css">
     <link rel="stylesheet" href="/css/weather.css">
+    <link rel="stylesheet" href="/css/rain.css">
     <!-- 引入地圖套件 -->
-    <!-- <script src="https://unpkg.com/d3@5.6.0/dist/d3.min.js"></script>
-    <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.js"></script> -->
+    <script src="https://unpkg.com/d3@5.6.0/dist/d3.min.js"></script>
+    <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.js"></script>
   
     <!-- js檔  -->
-    <!-- <script type="module" src="/js/map.js" defer></script> -->
+    <script type="module" src="/js/map.js" defer></script>
    
     <!-- Font Awesome -->
       <link
@@ -123,7 +124,7 @@
               </div>
 
             </div>
-            <div class="rain_info_container" ></div>
+            <div class="rain_info_container" id="rainResult"></div>
           </div>
 
           
@@ -145,5 +146,6 @@
 
     <script type="module" src="./js/weather.js"></script>
     <script type="module" src="./js/main.js"></script>
+    <script type="module" src="./js/rain.js"></script>
   </body>
 </html>
