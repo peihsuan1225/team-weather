@@ -6,7 +6,7 @@ import asyncio
 import math
 #四捨五入用
 
-app = FastAPI()
+
 router = APIRouter()
 class Station(BaseModel):
     StationName: str
@@ -64,7 +64,7 @@ async def get_data(location_name: str):
     
     return CountyData(countryName=location_name, stations=stations)
 
-@app.get("/api/rainfall/{location_name}", response_model=ResultResponse)
+@router.get("/api/rainfall/{location_name}", response_model=ResultResponse)
 async def get_rainfall(location_name: str = Depends(validate_location)):
     rainfall_data = await get_data(location_name)
     return ResultResponse(result=RainfallData(rainfall_data=[rainfall_data]))
@@ -72,3 +72,4 @@ async def get_rainfall(location_name: str = Depends(validate_location)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
