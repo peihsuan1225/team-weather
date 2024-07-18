@@ -7,6 +7,8 @@ function getRainData(cityName = "臺北市") {
   )}`;
 
   showLoading();
+  const rainResult = document.querySelector("#rainResult");
+  rainResult.innerHTML = "";
 
   fetch(url)
     .then((response) => {
@@ -16,11 +18,8 @@ function getRainData(cityName = "臺北市") {
       return response.json();
     })
     .then((data) => {
-      hideLoading();
-
       console.log(data);
-      const rainResult = document.querySelector("#rainResult");
-      rainResult.innerHTML = "";
+      hideLoading();
 
       const cityData = data.result.rainfall_data;
 
