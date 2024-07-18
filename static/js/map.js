@@ -10,7 +10,7 @@ var projectmethod = d3.geoMercator().center([120.3, 24.25]).scale(12000);
 // 地理路徑生成器
 var pathGenerator = d3.geoPath().projection(projectmethod);
 
-d3.json("./static/asset/COUNTY_MOI_1090820.json").then((data) => {
+d3.json("./asset/COUNTY_MOI_1090820.json").then((data) => {
   const geometries = topojson.feature(data, data.objects["COUNTY_MOI_1090820"]);
   g.append("path");
   const paths = g.selectAll("path").data(geometries.features);
@@ -138,18 +138,23 @@ function showRainfall(data_rainfall) {
 
 //點擊地圖後的事件
 function onClickMap(element, name) {
-  document.querySelector(".county").textContent = name;
+  if (document.querySelector(".loader").style.display === "none"){
+    document.querySelector(".county").textContent = name;
 
-  // 移除縣市的選中狀態
-  d3.selectAll(".county").classed("selected", false);
+    // 移除縣市的選中狀態
+    d3.selectAll(".county").classed("selected", false);
 
-  // 為當前點擊的縣市添加選中狀態
-  d3.select(element).classed("selected", true);
+    // 為當前點擊的縣市添加選中狀態
+    d3.select(element).classed("selected", true);
 
-  clearRainfall(); //清掉雨量顯示
+    clearRainfall(); //清掉雨量顯示
 
-  updateWeatherForCounty(name);
-  getRainData(name);
+    updateWeatherForCounty(name);
+    getRainData(name);
+  } else {
+    console.log("讀取中");
+  }
 }
+
 
 export { showRainfall, clearRainfall, hideRainfall, openRainfall };
