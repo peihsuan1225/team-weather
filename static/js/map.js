@@ -76,7 +76,7 @@ function openRainfall() {
 // ** showRainfall(雨量陣列資料) 在地圖上顯示雨量全圈
 function showRainfall(data_rainfall) {
   clearRainfall();
-
+  
   // 創建一個地圖投影
   var projection = d3.geoMercator().center([120.3, 24.25]).scale(12000);
 
@@ -86,7 +86,7 @@ function showRainfall(data_rainfall) {
     .domain([0, d3.max(data_rainfall, (d) => d.Past24hr_rainfall)]) // 範圍從0到最大雨量值
     .range(["rgb(125, 204, 224,0.4)", "rgb(0, 0, 255,0.8)"]); // 顏色範圍從淺藍到深藍
 
-  g.selectAll("circle")
+  var circles = g.selectAll("circle")
     .data(data_rainfall)
     .enter()
     .append("circle")
@@ -121,15 +121,23 @@ function showRainfall(data_rainfall) {
     .on("mouseout", function (d) {
       d3.select("#tooltip").style("opacity", 0);
     });
+
+  // 在結束時執行操作
+  circles.transition().duration(0).on("end", function() {
+    if (document.getElementById("weather_btn").classList.contains("active")) {
+      hideRainfall();
+    } else if (document.getElementById("rain_btn").classList.contains("active")) {
+      openRainfall();
+    }
+  });
 }
 
 //點擊地圖後的事件
 function onClickMap(element, name) {
   document.querySelector(".county").textContent = name;
 
-  // 移除所有縣市的選中狀態和名稱
+  // 移除縣市的選中狀態
   d3.selectAll(".county").classed("selected", false);
-  d3.selectAll(".county-label").remove();
 
   // 為當前點擊的縣市添加選中狀態
   d3.select(element).classed("selected", true);
@@ -138,61 +146,8 @@ function onClickMap(element, name) {
 
   updateWeatherForCounty(name);
   getRainData(name);
+
 }
 
-
-
-//測試用資料
-let data = {
-  result: {
-    fields: [
-      {
-        id: "countryName",
-        type: "string",
-      },
-      {
-        id: "StationName",
-        type: "string",
-      },
-      {
-        id: "Past24hr_rainfall",
-        type: "float",
-      },
-      {
-        id: "StationLatitude",
-        type: "float",
-      },
-      {
-        id: "StationLongitude",
-        type: "float",
-      },
-    ],
-    rainfall_data: [
-      {
-        countryName: "臺北市",
-        stations: [
-          {
-            StationName: "花蓮",
-            Past24hr_rainfall: 16,
-            StationLatitude: 23.975128,
-            StationLongitude: 121.613275,
-          },
-          {
-            StationName: "尖山",
-            Past24hr_rainfall: 20,
-            StationLatitude: 22.813153,
-            StationLongitude: 120.367789,
-          },
-          {
-            StationName: "後龍",
-            Past24hr_rainfall: 30,
-            StationLatitude: 24.648563,
-            StationLongitude: 120.831834,
-          },
-        ],
-      },
-    ],
-  },
-};
 
 export { showRainfall, clearRainfall, hideRainfall, openRainfall };
