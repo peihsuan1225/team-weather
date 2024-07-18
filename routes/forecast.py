@@ -27,9 +27,20 @@ def get_values(official_response, element_code):
         if len(values) == 2:
             values.insert(0, None)
             values.insert(1, None)
+        elif len(values) == 0:
+            values.insert(0, None)
+            values.insert(1, None)
+            values.insert(2, None)
+            values.insert(3, None)
     else:
         if len(values) == 1:
             values.insert(0, None)
+        elif len(values) == 0:
+            values.insert(0, None)
+            values.insert(1, None)
+    # print(element_code)
+    # print(values)
+    # print("---")
     return values
 
 
@@ -52,6 +63,9 @@ def get_avg_value(official_response, element_code):
                             values.append(elementValue["value"])
 
     if element_code in ["UVI", "Wx", "WeatherDescription"]:
+        # print(element_code)
+        # print(values)
+        # print("------")
         if len(values) == 2:
             values.insert(0, None)
             values.insert(1, None)
@@ -60,6 +74,8 @@ def get_avg_value(official_response, element_code):
         elif len(values) == 0:
             values.insert(0, None)
             values.insert(1, None)
+            values.insert(2, None)
+            values.insert(3, None)
         return values
     elif len(values) >= 2:
         value = sum(values) / len(values)
@@ -259,10 +275,20 @@ async def get_forecast(locationName: str):
             else:
                 min_temp[0] = int(min_temp[0])
 
+            if min_temp[1] == None:
+                min_temp[1] = min_temp[1]
+            else:
+                min_temp[1] = int(min_temp[1])
+
             if max_temp[0] == None:
                 max_temp[0] = max_temp[0]
             else:
                 max_temp[0] = int(max_temp[0])
+
+            if max_temp[1] == None:
+                max_temp[1] = max_temp[1]
+            else:
+                max_temp[1] = int(max_temp[1])
 
             response_data["result"]["weatherElement"].append(
                 {
@@ -277,7 +303,7 @@ async def get_forecast(locationName: str):
                                 },
                                 {
                                     "time": "night",
-                                    "value": int(min_temp[1]),
+                                    "value": min_temp[1],
                                     "measures": "攝氏度"
                                 }
                             ]
@@ -291,7 +317,7 @@ async def get_forecast(locationName: str):
                                 },
                                 {
                                     "time": "night",
-                                    "value": int(max_temp[1]),
+                                    "value": max_temp[1],
                                     "measures": "攝氏度"
                                 }
                             ]
@@ -313,6 +339,8 @@ async def get_forecast(locationName: str):
                     ]
                 }
             )
+
+        # print(response_data)
 
         response = JSONResponse(content=response_data, status_code=200)
 
