@@ -17,6 +17,7 @@ function handlePageSwitch() {
 
   // update display of weather and rain
   function updateDisplay() {
+    hideRainfall();
     if (weatherBtn.classList.contains("active")) {
       hideRainfall();
       weatherContainer.style.display = "flex";
@@ -72,4 +73,6 @@ function initPage() {
 }
 
 // //初始化天氣資料
-document.addEventListener("DOMContentLoaded", initPage);
+document.addEventListener("DOMContentLoaded", () => {
+  initPage();
+});

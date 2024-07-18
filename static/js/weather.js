@@ -299,59 +299,109 @@ function hideLoading() {
   loadingContainer.style.display = "none";
 }
 
-//獲取今日天氣資料
-async function fetchDayWeatherData(countyName) {
-  try {
-    const response = await fetch(
-      `http://52.9.113.1:8001/api/daily/forecast/${countyName}`
-    );
-    const results = await response.json();
+const CACHE_EXPIRY = 30 * 60 * 1000; // 30分鐘後失效
 
-    if (!response.ok) {
-      throw new Error(results.message);
+//清空過期的快取
+function cleanExpiredCache() {
+  const now = Date.now();
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("weather_")) {
+      try {
+        const cached = JSON.parse(localStorage.getItem(key));
+        if (now - cached.timestamp > CACHE_EXPIRY) {
+          localStorage.removeItem(key);
+        }
+      } catch (error) {
+        console.error("Error parsing cached data:", error);
+        localStorage.removeItem(key);
+      }
     }
-
-    return results;
-  } catch (error) {
-    console.log("Error: ", error);
-    return null;
   }
 }
 
-//獲取一週天氣資料
-async function fetchWeekWeatherData(countyName) {
-  try {
-    const response = await fetch(
-      `http://52.9.113.1:8001/api/weekly/forecast/${countyName}`
-    );
-    const results = await response.json();
+// 從 localStorage獲取點擊過的縣市的資料
+function getFromCache(key) {
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_EXPIRY) {
+        return data;
+      } else {
+        localStorage.removeItem(key); // 移除過期數據
+      }
+    } catch (error) {
+      console.error("Error parsing cached data:", error);
+      localStorage.removeItem(key); // 移除無效數據
+    }
+  }
+  return null;
+}
 
-    if (!response.ok) {
-      throw new Error(results.message);
+function setToCache(key, data) {
+  localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+}
+
+// 合併獲取今日和一週天氣資料，並使用 localStorage快取
+async function fetchWeatherData(countyName) {
+  cleanExpiredCache(); // 清理過期快取
+  const cacheKey = `weather_${countyName}`;
+  const cachedData = getFromCache(cacheKey);
+
+  if (cachedData) {
+    console.log("使用快取的天氣數據:", countyName);
+    return cachedData;
+  }
+
+  try {
+    const [dayResponse, weekResponse] = await Promise.all([
+      fetch(`http://52.9.113.1:8001/api/daily/forecast/${countyName}`),
+      fetch(`http://52.9.113.1:8001/api/weekly/forecast/${countyName}`),
+    ]);
+
+    const dayResults = await dayResponse.json();
+    const weekResults = await weekResponse.json();
+
+    if (!dayResponse.ok) {
+      throw new Error(dayResults.message || "獲取日天氣數據失敗");
     }
 
-    return results;
+    if (!weekResponse.ok) {
+      throw new Error(weekResults.message || "獲取週天氣數據失敗");
+    }
+
+    const weatherData = { dayData: dayResults, weekData: weekResults };
+    setToCache(cacheKey, weatherData);
+
+    return weatherData;
   } catch (error) {
-    console.log("Error: ", error);
+    console.error("Error fetching weather data:", error);
     return null;
   }
 }
 
 // 匯出更新天氣資料
 async function updateWeatherForCounty(countyName) {
+  showLoading();
   const weatherContainer = document.querySelector(
     ".week_weather_info_container"
   );
   weatherContainer.innerHTML = "";
 
-  const newDayResult = await fetchDayWeatherData(countyName);
-  console.log("從地圖過來:", newDayResult);
-  const newWeekResult = await fetchWeekWeatherData(countyName);
-  console.log("從地圖過來:", newWeekResult);
-  if (!newDayResult || !newWeekResult) return;
+  const weatherData = await fetchWeatherData(countyName);
+
+  if (weatherData) {
+    const { dayData, weekData } = weatherData;
+    console.log("顯示天氣數據 - 日天氣:", dayData);
+    console.log("顯示天氣數據 - 週天氣:", weekData);
+    displayWeather(dayData, weekData);
+  } else {
+    console.error("無法獲取天氣數據");
+    // 可以在這裡添加錯誤處理的UI邏輯
+  }
 
   hideLoading();
-  displayWeather(newDayResult, newWeekResult);
 }
 
 export { updateWeatherForCounty, showLoading, hideLoading };
