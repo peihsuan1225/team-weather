@@ -56,11 +56,22 @@ d3.select("body")
   .attr("id", "tooltip")
   .attr("style", "position: absolute; opacity: 0;");
 
-// ** clearRainfall 移除地圖雨量的function
+// ** clearRainfall 移除地圖雨量
 function clearRainfall() {
   d3.selectAll("circle").remove();
-  console.log("刪除成功");
 }
+
+// ** hideRainfall 隱藏地圖雨量顯示
+function hideRainfall() {
+  d3.selectAll("circle").style("display","none");
+}
+
+// ** openRainfall 開啟地圖雨量顯示
+function openRainfall() {
+  d3.selectAll("circle").style("display","block");
+}
+
+
 
 // ** showRainfall(雨量陣列資料) 在地圖上顯示雨量全圈
 function showRainfall(data_rainfall) {
@@ -129,16 +140,7 @@ function onClickMap(element, name) {
   getRainData(name);
 }
 
-// //點擊切換雨量按鈕，出現雨量資料(測試用)
-// document.querySelector("#rain_btn").addEventListener("click",function(){
-//    //假裝自己撈到資料
-//   let testdata = data;
-//   let stations = testdata.result.rainfall_data[0].stations;
-//   // console.log(stations);
 
-//   //畫雨量長條圖資料
-//   showRainfall(stations);
-// })
 
 //測試用資料
 let data = {
@@ -193,4 +195,4 @@ let data = {
   },
 };
 
-export { showRainfall, clearRainfall };
+export { showRainfall, clearRainfall, hideRainfall, openRainfall };
