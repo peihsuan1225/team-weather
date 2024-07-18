@@ -138,7 +138,7 @@ function showRainfall(data_rainfall) {
 
 //點擊地圖後的事件
 function onClickMap(element, name) {
-  if (document.querySelector(".loader").style.display === "none"){
+  if (document.querySelector(".loader").style.display === "none") {
     document.querySelector(".county").textContent = name;
 
     // 移除縣市的選中狀態
@@ -155,6 +155,5 @@ function onClickMap(element, name) {
     console.log("讀取中");
   }
 }
-
 
 export { showRainfall, clearRainfall, hideRainfall, openRainfall };

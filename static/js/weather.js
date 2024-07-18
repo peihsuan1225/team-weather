@@ -145,7 +145,6 @@ function createWeatherElement(data, dayName, isNight, isToday) {
   //整理資料
   const { date, weatherElement } = data;
   const [{ Mintemp }, { MaxTemp }, { Wx }] = weatherElement;
-  console.log(Mintemp, MaxTemp, Wx);
 
   // const container = document.createElement("div");
   const info = document.createElement("div");
