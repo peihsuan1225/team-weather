@@ -141,10 +141,11 @@ function animateValue(obj, start, end, duration) {
 }
 
 // 創建一週天氣元素
-function createWeatherElement(data, dayName, isNight) {
+function createWeatherElement(data, dayName, isNight, isToday) {
   //整理資料
   const { date, weatherElement } = data;
   const [{ Mintemp }, { MaxTemp }, { Wx }] = weatherElement;
+  console.log(Mintemp, MaxTemp, Wx);
 
   // const container = document.createElement("div");
   const info = document.createElement("div");
@@ -165,17 +166,6 @@ function createWeatherElement(data, dayName, isNight) {
   tempBar.classList.add("week_weather_info_temp_bar");
   maxTemp.classList.add("week_weather_info_temp_max");
 
-  //設置初始數據(白天)
-  setWeather(false);
-
-  //監聽 hover事件
-  info.addEventListener("mouseenter", () => {
-    setWeather(true);
-  });
-  info.addEventListener("mouseleave", () => {
-    setWeather(false);
-  });
-
   //檢查是白天還是夜晚，顯示相對應的資料
   function setWeather(isNight) {
     const timeOfDay = isNight ? "night" : "daytime";
@@ -192,6 +182,39 @@ function createWeatherElement(data, dayName, isNight) {
     const max = MaxTemp.find((item) => item.time === timeOfDay)?.value;
     maxTemp.textContent = `${max}°C`;
   }
+
+  if (isToday) {
+    // 特別處理今天的數據
+    const daytimeMin = Mintemp.find((item) => item.time === "daytime")?.value;
+    const nightMin = Mintemp.find((item) => item.time === "night")?.value;
+
+    // 決定使用哪個時段的數據
+    const useDaytime = daytimeMin !== null;
+    const periodText = useDaytime ? "白天" : "晚上";
+
+    day.textContent = `${dayName}${periodText}`;
+
+    const selectedTime = useDaytime ? "daytime" : "night";
+
+    const selectedData = {
+      min: Mintemp.find((item) => item.time === selectedTime)?.value,
+      max: MaxTemp.find((item) => item.time === selectedTime)?.value,
+      weatherCode: Wx.find((item) => item.time === selectedTime)?.code,
+    };
+
+    icon.src = getWeatherIcon(selectedData.weatherCode, !useDaytime);
+    minTemp.textContent =
+      selectedData.min !== null ? `${selectedData.min}°C` : "-";
+    maxTemp.textContent =
+      selectedData.max !== null ? `${selectedData.max}°C` : "-";
+  } else {
+    // 非今天的數據使用 setWeather
+    setWeather(false);
+
+    info.addEventListener("mouseenter", () => setWeather(true));
+    info.addEventListener("mouseleave", () => setWeather(false));
+  }
+
   tempInfo.appendChild(minTemp);
   tempInfo.appendChild(tempBar);
   tempInfo.appendChild(maxTemp);
@@ -219,7 +242,13 @@ function displayWeekWeather(data, isNight = false) {
   const dayNames = getWeekDayNames(today);
 
   weatherElement.forEach((data, index) => {
-    const infoEL = createWeatherElement(data, dayNames[index], isNight);
+    const isToday = index === 0;
+    const infoEL = createWeatherElement(
+      data,
+      dayNames[index],
+      isNight,
+      isToday
+    );
 
     //如果是最一個元素，拿掉下底線
     if (index === weatherElement.length - 1) {

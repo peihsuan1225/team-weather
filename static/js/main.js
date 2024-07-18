@@ -49,6 +49,7 @@ function handlePageSwitch() {
 function initPage() {
   //初始化載入默認城市
   const defaultCity = "臺北市";
+  console.log("是我叫的");
 
   updateWeatherForCounty(defaultCity);
 

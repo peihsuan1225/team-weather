@@ -303,6 +303,8 @@ async def get_forecast(locationName: str):
                 }
             )
 
+        print(response_data)
+
         response = JSONResponse(content=response_data, status_code=200)
 
     except Exception as e:
