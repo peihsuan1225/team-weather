@@ -1,27 +1,32 @@
 import { showRainfall } from "./map.js";
+import { showLoading, hideLoading } from "./weather.js";
 
 function getRainData(cityName = "臺北市") {
-  fetch("https://tli-gini.github.io/WeHelp-Stage-1/test/rain.json")
-    .then((response) => response.json())
+  const url = `http://52.9.113.1:8001/api/rainfall/${encodeURIComponent(
+    cityName
+  )}`;
+
+  showLoading();
+
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
+      hideLoading();
+
       console.log(data);
       const rainResult = document.querySelector("#rainResult");
       rainResult.innerHTML = "";
 
-      const cityData = data.result.rainfall_data.filter(
-        (city) => city.countryName === cityName
-      );
-      console.log(cityName);
-
-      // 將 station names 包成 array
-      const stationNames = [];
+      const cityData = data.result.rainfall_data;
 
       if (cityData.length > 0) {
         cityData.forEach((city) => {
           city.stations.forEach((station, index) => {
-            // Add station name to the array
-            stationNames.push(station.StationName);
-
             const stationDiv = document.createElement("div");
             stationDiv.className = "rain_info";
             stationDiv.id = `station-${index}`;
@@ -43,13 +48,17 @@ function getRainData(cityName = "臺北市") {
           });
         });
 
+        // Station names for showRainfall
+        const stationNames = data["result"]["rainfall_data"][0]["stations"];
+
         // Call showRainfall
         showRainfall(stationNames);
         console.log(stationNames);
       }
     })
     .catch((error) => {
-      console.log("Error: ", error);
+      hideLoading();
+      console.error("Error fetching data: ", error);
       return null;
     });
 }
