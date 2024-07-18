@@ -1,3 +1,6 @@
+// 獲取當前網址
+const currentURL = window.location.origin;
+
 //天氣關鍵字與 icon對照
 const weatherIconMapping = {
   // 晴空萬里
@@ -84,10 +87,8 @@ function getWeekDayNames(startDateStr) {
 }
 
 //根據溫度範圍變化溫度數字顏色
-const getColorForTemp = (value) => {
-  let r = 0,
-    g = 0,
-    b = 0;
+function getColorForTemp(value) {
+  let r, g, b;
   if (value < 20) {
     // 低溫範圍：藍色到綠色
     r = 0;
@@ -95,17 +96,18 @@ const getColorForTemp = (value) => {
     b = Math.floor((200 * (20 - value)) / 20);
   } else if (value <= 30) {
     // 中溫範圍：綠色到黃色
-    r = Math.floor((173 * (value - 20)) / 10);
-    g = Math.floor((100 * (30 - value)) / 10) + 83;
-    b = Math.floor((73 * (value - 20)) / 10);
+    r = Math.floor((200 * (value - 20)) / 10);
+    g = Math.floor((100 * (30 - value)) / 10);
+    b = 0;
   } else {
-    // 高溫範圍：黃色到紅色 (R173, G83, B73)
-    r = 173;
-    g = Math.max(83, Math.floor(173 - (90 * (value - 30)) / 20));
-    b = 73;
+    // 高溫：過渡到指定的紅色 (R173, G83, B73)
+    const transition = Math.min((value - 30) / 10, 1); // 10度内完成過渡
+    r = Math.floor(200 + (173 - 200) * transition);
+    g = Math.floor(83 * transition);
+    b = Math.floor(73 * transition);
   }
   return `rgb(${r}, ${g}, ${b})`;
-};
+}
 
 //把顏色套用進溫度數字
 const applyTemperatureColor = (element, temperature) => {
@@ -301,7 +303,7 @@ function hideLoading() {
 async function fetchDayWeatherData(countyName) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/api/daily/forecast/${countyName}`
+      `http://52.9.113.1:8001/api/daily/forecast/${countyName}`
     );
     const results = await response.json();
 
@@ -320,7 +322,7 @@ async function fetchDayWeatherData(countyName) {
 async function fetchWeekWeatherData(countyName) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/api/weekly/forecast/${countyName}`
+      `http://52.9.113.1:8001/api/weekly/forecast/${countyName}`
     );
     const results = await response.json();
 

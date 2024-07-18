@@ -19,7 +19,7 @@ d3.json("./asset/COUNTY_MOI_1090820.json").then((data) => {
     .attr("d", pathGenerator)
     .attr("class", "county")
     .on("click", function (d) {
-      onClickMap(this, d.properties["COUNTYNAME"]); // 將資料傳遞給 Onclick 函數
+      onClickMap(this, d.properties["COUNTYNAME"]);
     })
     .on("mouseover", function (d) {
       d3.select("#tooltip")
@@ -37,6 +37,15 @@ d3.json("./asset/COUNTY_MOI_1090820.json").then((data) => {
     })
     .on("mouseout", function (d) {
       d3.select("#tooltip").style("opacity", 0);
+    })
+
+    // 設定初始值台北市
+    .each(function (d) {
+      const initialCountyName = "臺北市";
+      // 查找初始選取的縣市並模擬點擊事件
+      if (d.properties["COUNTYNAME"] === initialCountyName) {
+        onClickMap(this, d.properties["COUNTYNAME"]); // 模擬點擊事件
+      }
     });
 });
 
@@ -59,6 +68,12 @@ function showRainfall(data_rainfall) {
   // 創建一個地圖投影
   var projection = d3.geoMercator().center([120.3, 24.25]).scale(12000);
 
+  // 定義顏色比例尺
+  var colorScale = d3
+    .scaleLinear()
+    .domain([0, d3.max(data_rainfall, (d) => d.Past24hr_rainfall)]) // 範圍從0到最大雨量值
+    .range(["rgb(125, 204, 224,0.4)", "rgb(0, 0, 255,0.8)"]); // 顏色範圍從淺藍到深藍
+
   g.selectAll("circle")
     .data(data_rainfall)
     .enter()
@@ -69,10 +84,10 @@ function showRainfall(data_rainfall) {
     .attr("cy", function (d) {
       return projection([d.StationLongitude, d.StationLatitude])[1];
     })
-    .attr("r", function (d) {
-      return d.Past24hr_rainfall / 3;
+    .attr("r", 3)
+    .attr("fill", function (d) {
+      return colorScale(d.Past24hr_rainfall);
     })
-    .attr("fill", "rgb(125, 204, 224,0.4)")
     //觀測站的tooltip
     .on("mouseover", function (d) {
       d3.select("#tooltip")
@@ -108,7 +123,7 @@ function onClickMap(element, name) {
   d3.select(element).classed("selected", true);
 
   clearRainfall(); //清掉雨量顯示
-  console.log(name);
+
   updateWeatherForCounty(name);
 }
 

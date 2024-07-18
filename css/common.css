@@ -45,6 +45,10 @@ body {
   z-index: 5;
 }
 
+.nav_container a {
+  text-decoration: none;
+}
+
 .nav_logo_container {
   font-weight: 700;
   color: var(--dark);
