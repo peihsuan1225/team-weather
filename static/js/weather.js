@@ -1,6 +1,15 @@
 // 獲取當前網址
 const currentURL = window.location.origin;
 
+//preload圖片
+function preloadTodayWeatherIcon(iconId) {
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.href = `/static/asset/${iconId}.svg`;
+  link.as = "image";
+  document.head.appendChild(link);
+}
+
 //天氣關鍵字與 icon對照
 const weatherIconMapping = {
   // 晴空萬里
@@ -384,8 +393,8 @@ async function fetchWeatherData(countyName) {
 
   try {
     const [dayResponse, weekResponse] = await Promise.all([
-      fetch(`http://52.9.113.1:8001/api/daily/forecast/${countyName}`),
-      fetch(`http://52.9.113.1:8001/api/weekly/forecast/${countyName}`),
+      fetch(`/api/daily/forecast/${countyName}`),
+      fetch(`/api/weekly/forecast/${countyName}`),
     ]);
 
     const dayResults = await dayResponse.json();
