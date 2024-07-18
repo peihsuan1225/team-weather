@@ -138,18 +138,23 @@ function showRainfall(data_rainfall) {
 
 //點擊地圖後的事件
 function onClickMap(element, name) {
-  document.querySelector(".county").textContent = name;
+  if (document.querySelector(".loader").style.display === "none"){
+    document.querySelector(".county").textContent = name;
 
-  // 移除縣市的選中狀態
-  d3.selectAll(".county").classed("selected", false);
+    // 移除縣市的選中狀態
+    d3.selectAll(".county").classed("selected", false);
 
-  // 為當前點擊的縣市添加選中狀態
-  d3.select(element).classed("selected", true);
+    // 為當前點擊的縣市添加選中狀態
+    d3.select(element).classed("selected", true);
 
-  clearRainfall(); //清掉雨量顯示
+    clearRainfall(); //清掉雨量顯示
 
-  updateWeatherForCounty(name);
-  getRainData(name);
+    updateWeatherForCounty(name);
+    getRainData(name);
+  } else {
+    console.log("讀取中");
+  }
 }
+
 
 export { showRainfall, clearRainfall, hideRainfall, openRainfall };
