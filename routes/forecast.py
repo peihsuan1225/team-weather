@@ -81,11 +81,13 @@ async def get_official_response(day_offset, locationName, elements):
     date = get_date(days_offset=day_offset)
     timeFrom = date + "T00:00:00"
     timeTo = get_date(days_offset=day_offset + 1) + "T00:00:00"
-    url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={
-            elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
+    url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWA-F75AC89B-4BC1-49EC-B310-A79E92016825&elementName={
+        elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
     
     async with aiohttp.ClientSession() as session:
         response_text = await fetch(session, url)
+        # print("API Response Text:", response_text)
+
         return json.loads(response_text)
 
 @router.get("/api/daily/forecast/{locationName}")
@@ -104,7 +106,7 @@ async def get_forecast(locationName: str):
         date = get_date()
         timeFrom = date + "T00:00:00"
         timeTo = get_date(days_offset=1) + "T00:00:00"
-        url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={
+        url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWA-F75AC89B-4BC1-49EC-B310-A79E92016825&elementName={
             elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
         x = requests.get(url)
         official_response = json.loads(x.text)

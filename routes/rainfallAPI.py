@@ -40,7 +40,7 @@ def validate_location(location_name: str):
 async def get_data(location_name: str):
     url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0002-001"
     params = {
-        "Authorization": "CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855",
+        "Authorization": "CWA-F75AC89B-4BC1-49EC-B310-A79E92016825",
         "RainfallElement": "Past24hr",
         "GeoInfo": "Coordinates,CountyName"
     }
