@@ -4,40 +4,40 @@ const currentURL = window.location.origin;
 //天氣關鍵字與 icon對照
 const weatherIconMapping = {
   // 晴空萬里
-  "01": "/asset/晴空萬里.svg",
+  "01": "/static/asset/晴空萬里.svg",
 
   // 晴時多雲
-  "02": "/asset/晴時多雲.svg",
-  "03": "/asset/晴時多雲.svg",
+  "02": "/static/asset/晴時多雲.svg",
+  "03": "/static/asset/晴時多雲.svg",
 
   // 多雲時陰
-  "04": "/asset/多雲時陰.svg",
-  "05": "/asset/多雲時陰.svg",
-  "06": "/asset/多雲時陰.svg",
-  "07": "/asset/多雲時陰.svg",
+  "04": "/static/asset/多雲時陰.svg",
+  "05": "/static/asset/多雲時陰.svg",
+  "06": "/static/asset/多雲時陰.svg",
+  "07": "/static/asset/多雲時陰.svg",
 
   // 多雲短暫陣雨
-  "08": "/asset/多雲短暫陣雨.svg",
-  "09": "/asset/多雲短暫陣雨.svg",
-  10: "/asset/多雲短暫陣雨.svg",
+  "08": "/static/asset/多雲短暫陣雨.svg",
+  "09": "/static/asset/多雲短暫陣雨.svg",
+  10: "/static/asset/多雲短暫陣雨.svg",
 
   // 晴短暫陣雨
-  11: "/asset/晴短暫陣雨.svg",
-  12: "/asset/晴短暫陣雨.svg",
-  13: "/asset/晴短暫陣雨.svg",
-  14: "/asset/晴短暫陣雨.svg",
+  11: "/static/asset/晴短暫陣雨.svg",
+  12: "/static/asset/晴短暫陣雨.svg",
+  13: "/static/asset/晴短暫陣雨.svg",
+  14: "/static/asset/晴短暫陣雨.svg",
 
   // 雷陣雨
-  15: "/asset/雷陣雨.svg",
-  16: "/asset/雷陣雨.svg",
-  17: "/asset/雷陣雨.svg",
-  18: "/asset/雷陣雨.svg",
+  15: "/static/asset/雷陣雨.svg",
+  16: "/static/asset/雷陣雨.svg",
+  17: "/static/asset/雷陣雨.svg",
+  18: "/static/asset/雷陣雨.svg",
 
   // 晴午後短暫雷陣雨
-  19: "/asset/晴午後短暫雷陣雨.svg",
-  20: "/asset/晴午後短暫雷陣雨.svg",
-  21: "/asset/晴午後短暫雷陣雨.svg",
-  22: "/asset/晴午後短暫雷陣雨.svg",
+  19: "/static/asset/晴午後短暫雷陣雨.svg",
+  20: "/static/asset/晴午後短暫雷陣雨.svg",
+  21: "/static/asset/晴午後短暫雷陣雨.svg",
+  22: "/static/asset/晴午後短暫雷陣雨.svg",
 };
 
 function getWeatherIcon(weatherCode, isNight = false) {
@@ -369,14 +369,14 @@ async function initWeather() {
 
   //監聽城市選擇事件(只有在手機版才會出現)
   const citySelector = document.querySelector(".city_selector");
+  const container = document.querySelector(
+    ".week_weather_info_and_rain_info_container"
+  );
   if (citySelector) {
     citySelector.addEventListener("change", async (e) => {
       const city = e.target.value;
-      console.log(city);
-      const dayResult = await fetchDayWeatherData(city);
-      const weekResult = await fetchWeekWeatherData(city);
-      if (!dayResult || !weekResult) return;
-      displayWeather(dayResult, weekResult);
+
+      updateWeatherForCounty(city);
     });
   }
 }

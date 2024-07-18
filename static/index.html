@@ -6,16 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>第一觀測站</title>
     <!-- 建立整體樣式指導：基礎字型、字體、基底色、標題、段落樣式等等 -->
-    <link rel="stylesheet" href="css/common.css" />
-    <link rel="stylesheet" href="/css/map.css">
-    <link rel="stylesheet" href="/css/weather.css">
-    <link rel="stylesheet" href="/css/rain.css">
+    <link rel="stylesheet" href="/static/css/common.css" />
+    <link rel="stylesheet" href="/static/css/map.css">
+    <link rel="stylesheet" href="/static/css/weather.css">
+    <link rel="stylesheet" href="/static/css/rain.css">
     <!-- 引入地圖套件 -->
     <script src="https://unpkg.com/d3@5.6.0/dist/d3.min.js"></script>
     <script src="https://unpkg.com/topojson@3.0.2/dist/topojson.js"></script>
   
     <!-- js檔  -->
-    <script type="module" src="/js/map.js" defer></script>
+    <script type="module" src="/static/js/map.js" defer></script>
    
     <!-- Font Awesome -->
       <link
@@ -33,7 +33,7 @@
         <a href="/">
           <div class="nav_logo_container">
             <div class="logo_wrapper ">
-              <img src="/asset/logo.svg" alt="logo">
+              <img src="/static/asset/logo.svg" alt="logo">
             </div>
             第一觀測站
           </div>
@@ -84,7 +84,7 @@
 
             <!-- icon & 平均溫度 -->
             <div class="weather_icon_and_temp">
-              <object class=" weather_icon weather_icon_shadow" data="/asset/晴空萬里.svg" type="image/svg+xml"></object>
+              <object class=" weather_icon weather_icon_shadow" data="/static/asset/晴空萬里.svg" type="image/svg+xml"></object>
               <div class="weather_temp_and_info">
                 <span class="weather_temp">31°C</span>
                 <span class="weather_description">晴空萬里</span>
@@ -116,7 +116,7 @@
 
               <div class="loader">
                 <div class="loader_wrapper">
-                  <img src="/asset/loading.svg">
+                  <img src="/static/asset/loading.svg">
                 </div>
                 <span>Loading...</span>
               </div>
@@ -158,6 +158,6 @@
       </div>
     </footer>
 
-    <script type="module" src="./js/main.js"></script>
+    <script type="module" src="/static/js/main.js"></script>
   </body>
 </html>
