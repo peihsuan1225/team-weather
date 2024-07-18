@@ -339,7 +339,6 @@ async function fetchWeekWeatherData(countyName) {
 
 // 匯出更新天氣資料
 async function updateWeatherForCounty(countyName) {
-  showLoading();
   const weatherContainer = document.querySelector(
     ".week_weather_info_container"
   );
@@ -355,30 +354,4 @@ async function updateWeatherForCounty(countyName) {
   displayWeather(newDayResult, newWeekResult);
 }
 
-// 匯出初始化天氣頁面
-async function initWeather() {
-  //初始化載入默認城市
-  const defaultCity = "臺北市";
-  showLoading();
-  const dayResult = await fetchDayWeatherData(defaultCity);
-  const weekResult = await fetchWeekWeatherData(defaultCity);
-
-  hideLoading();
-
-  displayWeather(dayResult, weekResult);
-
-  //監聽城市選擇事件(只有在手機版才會出現)
-  const citySelector = document.querySelector(".city_selector");
-  const container = document.querySelector(
-    ".week_weather_info_and_rain_info_container"
-  );
-  if (citySelector) {
-    citySelector.addEventListener("change", async (e) => {
-      const city = e.target.value;
-
-      updateWeatherForCounty(city);
-    });
-  }
-}
-
-export { initWeather, updateWeatherForCounty, showLoading, hideLoading };
+export { updateWeatherForCounty, showLoading, hideLoading };
