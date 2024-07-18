@@ -10,7 +10,7 @@ var projectmethod = d3.geoMercator().center([120.3, 24.25]).scale(12000);
 // 地理路徑生成器
 var pathGenerator = d3.geoPath().projection(projectmethod);
 
-d3.json("./asset/COUNTY_MOI_1090820.json").then((data) => {
+d3.json("./static/asset/COUNTY_MOI_1090820.json").then((data) => {
   const geometries = topojson.feature(data, data.objects["COUNTY_MOI_1090820"]);
   g.append("path");
   const paths = g.selectAll("path").data(geometries.features);
