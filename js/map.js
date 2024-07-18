@@ -19,7 +19,7 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
         .attr("d", pathGenerator)
         .attr("class","county")
         .on("click", function(d) {
-            onClickMap(this,d.properties["COUNTYNAME"]); // 將資料傳遞給 Onclick 函數
+            onClickMap(this,d.properties["COUNTYNAME"]); 
           })
         .on("mouseover", function(d) {
           d3.select('#tooltip').style('opacity', 1).html('<div class="custom_tooltip">縣市：' + d.properties["COUNTYNAME"] +'</div>')
@@ -30,6 +30,15 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
         .on("mouseout", function(d) {
           d3.select('#tooltip').style('opacity', 0)
         })
+    
+        // 設定初始值台北市
+        .each(function(d) {
+          const initialCountyName = "臺北市";
+          // 查找初始選取的縣市並模擬點擊事件
+          if (d.properties["COUNTYNAME"] === initialCountyName) {
+              onClickMap(this, d.properties["COUNTYNAME"]); // 模擬點擊事件
+          }
+        });
   })
 
   // 加上tooltip id
@@ -51,6 +60,11 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
     // 創建一個地圖投影
     var projection = d3.geoMercator().center([120.3, 24.25]).scale(12000);
 
+    // 定義顏色比例尺
+    var colorScale = d3.scaleLinear()
+    .domain([0, d3.max(data_rainfall, d => d.Past24hr_rainfall)]) // 範圍從0到最大雨量值
+    .range(["rgb(125, 204, 224,0.4)", "rgb(0, 0, 255,0.8)"]); // 顏色範圍從淺藍到深藍
+
     g.selectAll("circle")
       .data(data_rainfall)
       .enter()
@@ -61,10 +75,10 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
         .attr("cy", function(d) {
           return projection([d.StationLongitude, d.StationLatitude])[1];
         })
-        .attr("r",function(d) {
-            return d.Past24hr_rainfall/3;
-          })
-        .attr("fill","rgb(125, 204, 224,0.4)")
+        .attr("r",3)
+        .attr("fill",function(d) {
+          return colorScale(d.Past24hr_rainfall);
+        })
       //觀測站的tooltip
       .on("mouseover", function(d) {
         d3.select('#tooltip').style('opacity', 1).html('<div class="custom_tooltip">觀測站：' + d.StationName + '<br>雨量：' + d.Past24hr_rainfall + "mm"  +'</div>')
@@ -90,7 +104,7 @@ d3.json("./asset/COUNTY_MOI_1090820.json")
     d3.select(element).classed("selected", true);
 
     clearRainfall(); //清掉雨量顯示
-    console.log(name);
+  
     updateWeatherForCounty(name);  
   
   }
