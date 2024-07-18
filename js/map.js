@@ -1,4 +1,5 @@
 import { updateWeatherForCounty } from "./weather.js";
+import { getRainData } from "./rain.js";
 
 var svg = d3.select("svg");
 
@@ -125,6 +126,7 @@ function onClickMap(element, name) {
   clearRainfall(); //清掉雨量顯示
 
   updateWeatherForCounty(name);
+  getRainData(name);
 }
 
 // //點擊切換雨量按鈕，出現雨量資料(測試用)
