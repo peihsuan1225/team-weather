@@ -1,4 +1,4 @@
-import { initWeather } from "./weather.js";
+import { updateWeatherForCounty } from "./weather.js";
 import { getRainData } from "./rain.js";
 import { clearRainfall, hideRainfall, openRainfall } from "./map.js";
 
@@ -17,6 +17,7 @@ function handlePageSwitch() {
 
   // update display of weather and rain
   function updateDisplay() {
+    hideRainfall();
     if (weatherBtn.classList.contains("active")) {
       hideRainfall();
       weatherContainer.style.display = "flex";
@@ -46,15 +47,32 @@ function handlePageSwitch() {
 }
 
 function initPage() {
-  // 載入天氣頁面
-  initWeather();
+  //初始化載入默認城市
+  const defaultCity = "臺北市";
+
+  updateWeatherForCounty(defaultCity);
 
   //載入雨量頁面
   getRainData();
 
   //監聽頁面轉換按鈕
   handlePageSwitch();
+
+  //監聽城市選擇事件(只有在手機版才會出現)
+  const citySelector = document.querySelector(".city_selector");
+  const container = document.querySelector(
+    ".week_weather_info_and_rain_info_container"
+  );
+  if (citySelector) {
+    citySelector.addEventListener("change", async (e) => {
+      const city = e.target.value;
+      updateWeatherForCounty(city);
+      getRainData(city);
+    });
+  }
 }
 
 // //初始化天氣資料
-document.addEventListener("DOMContentLoaded", initPage);
+document.addEventListener("DOMContentLoaded", () => {
+  initPage();
+});

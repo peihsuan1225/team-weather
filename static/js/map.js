@@ -63,15 +63,13 @@ function clearRainfall() {
 
 // ** hideRainfall 隱藏地圖雨量顯示
 function hideRainfall() {
-  d3.selectAll("circle").style("display","none");
+  d3.selectAll("circle").style("display", "none");
 }
 
 // ** openRainfall 開啟地圖雨量顯示
 function openRainfall() {
-  d3.selectAll("circle").style("display","block");
+  d3.selectAll("circle").style("display", "block");
 }
-
-
 
 // ** showRainfall(雨量陣列資料) 在地圖上顯示雨量全圈
 function showRainfall(data_rainfall) {
@@ -146,8 +144,6 @@ function onClickMap(element, name) {
 
   updateWeatherForCounty(name);
   getRainData(name);
-
-}
 
 
 export { showRainfall, clearRainfall, hideRainfall, openRainfall };
