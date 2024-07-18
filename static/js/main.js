@@ -1,6 +1,6 @@
 import { initWeather } from "./weather.js";
 import { getRainData } from "./rain.js";
-import { clearRainfall } from "./map.js";
+import { clearRainfall, hideRainfall, openRainfall } from "./map.js";
 
 //處理天氣與雨量頁面轉換
 function handlePageSwitch() {
@@ -18,11 +18,12 @@ function handlePageSwitch() {
   // update display of weather and rain
   function updateDisplay() {
     if (weatherBtn.classList.contains("active")) {
-      clearRainfall();
+      hideRainfall();
       weatherContainer.style.display = "flex";
       rainContainer.style.display = "none";
     } else if (rainBtn.classList.contains("active")) {
       // showRainfall();
+      openRainfall();
       weatherContainer.style.display = "none";
       rainContainer.style.display = "flex";
     }
