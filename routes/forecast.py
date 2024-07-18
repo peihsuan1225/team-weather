@@ -4,9 +4,10 @@ from datetime import datetime, timezone, timedelta
 import requests
 import json
 from decimal import Decimal, ROUND_HALF_UP
+import asyncio
+import aiohttp
 
 router = APIRouter()
-
 
 def get_date(days_offset=0):
     tz = timezone(timedelta(hours=+8))
@@ -14,16 +15,14 @@ def get_date(days_offset=0):
     return date.strftime('%Y-%m-%d')
 
 
-def get_values(official_response, location_name, element_code):
+def get_values(official_response, element_code):
     values = []
-    for location in official_response["records"]["locations"]:
-        for loc in location["location"]:
-            if loc["locationName"] == location_name:
-                for weatherElement in loc["weatherElement"]:
-                    if weatherElement["elementName"] == element_code:
-                        for time in weatherElement["time"]:
-                            for elementValue in time["elementValue"]:
-                                values.append(elementValue["value"])
+    for location in official_response["records"]["locations"][0]["location"]:
+        for weatherElement in location["weatherElement"]:
+                if weatherElement["elementName"] == element_code:
+                    for time in weatherElement["time"]:
+                        for elementValue in time["elementValue"]:
+                            values.append(elementValue["value"])
     if element_code == "Wx":
         if len(values) == 2:
             values.insert(0, None)
@@ -34,25 +33,23 @@ def get_values(official_response, location_name, element_code):
     return values
 
 
-def get_avg_value(official_response, location_name, element_code):
+def get_avg_value(official_response, element_code):
     values = []
     special_process = ["WS", "UVI", "Wx", "WeatherDescription"]
-    for location in official_response["records"]["locations"]:
-        for loc in location["location"]:
-            if loc["locationName"] == location_name:
-                for weatherElement in loc["weatherElement"]:
-                    if weatherElement["elementName"] == element_code:
-                        for time in weatherElement["time"]:
-                            for elementValue in time["elementValue"]:
-                                if element_code not in special_process:
-                                    values.append(
-                                        Decimal(elementValue["value"]))
-                                elif element_code == "WS":
-                                    if elementValue["measures"] == "公尺/秒":
-                                        values.append(
-                                            Decimal(elementValue["value"]))
-                                elif element_code in ["UVI", "Wx", "WeatherDescription"]:
-                                    values.append(elementValue["value"])
+    for location in official_response["records"]["locations"][0]["location"]:
+        for weatherElement in location["weatherElement"]:
+            if weatherElement["elementName"] == element_code:
+                for time in weatherElement["time"]:
+                    for elementValue in time["elementValue"]:
+                        if element_code not in special_process:
+                            values.append(
+                                Decimal(elementValue["value"]))
+                        elif element_code == "WS":
+                            if elementValue["measures"] == "公尺/秒":
+                                values.append(
+                                    Decimal(elementValue["value"]))
+                        elif element_code in ["UVI", "Wx", "WeatherDescription"]:
+                            values.append(elementValue["value"])
 
     if element_code in ["UVI", "Wx", "WeatherDescription"]:
         if len(values) == 2:
@@ -76,6 +73,21 @@ def get_avg_value(official_response, location_name, element_code):
         return None
 
 
+async def fetch(session, url):
+    async with session.get(url) as response:
+        return await response.text()
+
+async def get_official_response(day_offset, locationName, elements):
+    date = get_date(days_offset=day_offset)
+    timeFrom = date + "T00:00:00"
+    timeTo = get_date(days_offset=day_offset + 1) + "T00:00:00"
+    url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={
+            elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
+    
+    async with aiohttp.ClientSession() as session:
+        response_text = await fetch(session, url)
+        return json.loads(response_text)
+
 @router.get("/api/daily/forecast/{locationName}")
 async def get_forecast(locationName: str):
     locationNames = ["新竹縣", "金門縣", "苗栗縣", "新北市", "宜蘭縣", "雲林縣", "臺南市", "高雄市", "彰化縣", "臺北市",
@@ -98,27 +110,26 @@ async def get_forecast(locationName: str):
         official_response = json.loads(x.text)
         # print(official_response)
 
-        avg_temp = get_avg_value(official_response, locationName, "T")
-        min_temp = get_avg_value(official_response, locationName, "MinT")
-        max_temp = get_avg_value(official_response, locationName, "MaxT")
-        avg_PoP = get_avg_value(official_response, locationName, "PoP12h")
-        avg_WS = get_avg_value(official_response, locationName, "WS")
-        UVI = get_avg_value(official_response, locationName, "UVI")
-        Wx = get_avg_value(official_response, locationName, "Wx")
-        WeatherDescription = get_avg_value(
-            official_response, locationName, "WeatherDescription")
+        avg_temp = get_avg_value(official_response, "T")
+        min_temp = get_avg_value(official_response, "MinT")
+        max_temp = get_avg_value(official_response, "MaxT")
+        avg_PoP = get_avg_value(official_response, "PoP12h")
+        avg_WS = get_avg_value(official_response, "WS")
+        UVI = get_avg_value(official_response, "UVI")
+        Wx = get_avg_value(official_response, "Wx")
+        WeatherDescription = get_avg_value(official_response, "WeatherDescription")
 
         if UVI[0] == None:
             UVI[0] = UVI[0]
         else:
             UVI[0] = int(UVI[0])
-        print(avg_temp)
-        print(min_temp)
-        print(avg_PoP)
-        print(avg_WS)
-        print(UVI)
-        print(Wx)
-        print(WeatherDescription)
+        # print(avg_temp)
+        # print(min_temp)
+        # print(avg_PoP)
+        # print(avg_WS)
+        # print(UVI)
+        # print(Wx)
+        # print(WeatherDescription)
 
         response_data = {
             "result": {
@@ -230,18 +241,16 @@ async def get_forecast(locationName: str):
             }
         }
 
-        for day_offset in range(7):
-            date = get_date(days_offset=day_offset)
-            timeFrom = date + "T00:00:00"
-            timeTo = get_date(days_offset=day_offset + 1) + "T00:00:00"
-            url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWB-840CF1E7-FC59-4E06-81C9-F4BB79253855&elementName={
-                elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
-            x = requests.get(url)
-            official_response = json.loads(x.text)
 
-            min_temp = get_values(official_response, locationName, "MinT")
-            max_temp = get_values(official_response, locationName, "MaxT")
-            Wx = get_values(official_response, locationName, "Wx")
+        tasks = [get_official_response(day_offset, locationName, elements) for day_offset in range(7)]
+        responses = await asyncio.gather(*tasks)
+
+        for day_offset, official_response in enumerate(responses):
+            date = get_date(days_offset=day_offset)
+
+            min_temp = get_values(official_response, "MinT")
+            max_temp = get_values(official_response, "MaxT")
+            Wx = get_values(official_response, "Wx")
 
             if min_temp[0] == None:
                 min_temp[0] = min_temp[0]
@@ -303,7 +312,7 @@ async def get_forecast(locationName: str):
                 }
             )
 
-        print(response_data)
+        # print(response_data)
 
         response = JSONResponse(content=response_data, status_code=200)
 
