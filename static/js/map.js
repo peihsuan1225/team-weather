@@ -74,7 +74,7 @@ function openRainfall() {
 // ** showRainfall(雨量陣列資料) 在地圖上顯示雨量全圈
 function showRainfall(data_rainfall) {
   clearRainfall();
-  
+
   // 創建一個地圖投影
   var projection = d3.geoMercator().center([120.3, 24.25]).scale(12000);
 
@@ -84,7 +84,8 @@ function showRainfall(data_rainfall) {
     .domain([0, d3.max(data_rainfall, (d) => d.Past24hr_rainfall)]) // 範圍從0到最大雨量值
     .range(["rgb(125, 204, 224,0.4)", "rgb(0, 0, 255,0.8)"]); // 顏色範圍從淺藍到深藍
 
-  var circles = g.selectAll("circle")
+  var circles = g
+    .selectAll("circle")
     .data(data_rainfall)
     .enter()
     .append("circle")
@@ -121,13 +122,18 @@ function showRainfall(data_rainfall) {
     });
 
   // 在結束時執行操作
-  circles.transition().duration(0).on("end", function() {
-    if (document.getElementById("weather_btn").classList.contains("active")) {
-      hideRainfall();
-    } else if (document.getElementById("rain_btn").classList.contains("active")) {
-      openRainfall();
-    }
-  });
+  circles
+    .transition()
+    .duration(0)
+    .on("end", function () {
+      if (document.getElementById("weather_btn").classList.contains("active")) {
+        hideRainfall();
+      } else if (
+        document.getElementById("rain_btn").classList.contains("active")
+      ) {
+        openRainfall();
+      }
+    });
 }
 
 //點擊地圖後的事件
@@ -144,6 +150,6 @@ function onClickMap(element, name) {
 
   updateWeatherForCounty(name);
   getRainData(name);
-
+}
 
 export { showRainfall, clearRainfall, hideRainfall, openRainfall };
