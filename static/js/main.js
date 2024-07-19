@@ -49,7 +49,6 @@ function handlePageSwitch() {
 function initPage() {
   //初始化載入默認城市
   const defaultCity = "臺北市";
-  console.log("是我叫的");
 
   updateWeatherForCounty(defaultCity);
 
@@ -67,7 +66,6 @@ function initPage() {
   if (citySelector) {
     citySelector.addEventListener("change", async (e) => {
       const city = e.target.value;
-      console.log("手機");
       updateWeatherForCounty(city);
       getRainData(city);
     });

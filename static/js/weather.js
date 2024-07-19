@@ -66,7 +66,7 @@ function getWeatherIcon(weatherCode, isNight = false) {
 
   // 如果都不匹配，返回默認icon
   console.error(`未找到匹配的天氣圖標代碼: ${code}`);
-  return "/asset/多雲時陰.svg"; // 默認icon
+  return "/static/asset/多雲時陰.svg"; // 默認icon
 }
 
 //日期換算星期
@@ -149,11 +149,48 @@ function animateValue(obj, start, end, duration) {
   window.requestAnimationFrame(step);
 }
 
+//檢查資料可不可用
+function checkData(Mintemp, MaxTemp, Wx) {
+  const daytimeData = {
+    min: Mintemp.find((item) => item.time === "daytime")?.value,
+    max: MaxTemp.find((item) => item.time === "daytime")?.value,
+    weatherCode: Wx.find((item) => item.time === "daytime")?.code,
+  };
+
+  const nightData = {
+    min: Mintemp.find((item) => item.time === "night")?.value,
+    max: MaxTemp.find((item) => item.time === "night")?.value,
+    weatherCode: Wx.find((item) => item.time === "night")?.code,
+  };
+
+  const hasDaytimeData =
+    daytimeData.min !== null &&
+    daytimeData.max !== null &&
+    daytimeData.weatherCode !== null;
+  const hasNightData =
+    nightData.min !== null &&
+    nightData.max !== null &&
+    nightData.weatherCode !== null;
+
+  if (!hasDaytimeData && !hasNightData) {
+    return null;
+  }
+
+  return { hasDaytimeData, hasNightData };
+}
+
 // 創建一週天氣元素
 function createWeatherElement(data, dayName, isNight, isToday) {
   //整理資料
   const { date, weatherElement } = data;
   const [{ Mintemp }, { MaxTemp }, { Wx }] = weatherElement;
+
+  //檢查資料可不可用
+  const dataAvailability = checkData(Mintemp, MaxTemp, Wx);
+  if (!dataAvailability) {
+    console.log(`${dayName} 的數據不可用`);
+    return null;
+  }
 
   // const container = document.createElement("div");
   const info = document.createElement("div");
@@ -192,33 +229,17 @@ function createWeatherElement(data, dayName, isNight, isToday) {
   }
 
   if (isToday) {
-    // 特別處理今天的數據
-    const daytimeMin = Mintemp.find((item) => item.time === "daytime")?.value;
-    const nightMin = Mintemp.find((item) => item.time === "night")?.value;
-
-    // 決定使用哪個時段的數據
-    const useDaytime = daytimeMin !== null;
-    const periodText = useDaytime ? "白天" : "晚上";
-
-    day.textContent = `${dayName}${periodText}`;
-
-    const selectedTime = useDaytime ? "daytime" : "night";
-
-    const selectedData = {
-      min: Mintemp.find((item) => item.time === selectedTime)?.value,
-      max: MaxTemp.find((item) => item.time === selectedTime)?.value,
-      weatherCode: Wx.find((item) => item.time === selectedTime)?.code,
-    };
-
-    icon.src = getWeatherIcon(selectedData.weatherCode, !useDaytime);
-    minTemp.textContent =
-      selectedData.min !== null ? `${selectedData.min}°C` : "-";
-    maxTemp.textContent =
-      selectedData.max !== null ? `${selectedData.max}°C` : "-";
+    if (dataAvailability.hasDaytimeData && dataAvailability.hasNightData) {
+      setWeather(false);
+      info.addEventListener("mouseenter", () => setWeather(true));
+      info.addEventListener("mouseleave", () => setWeather(false));
+    } else if (dataAvailability.hasDaytimeData) {
+      setWeather(false);
+    } else if (dataAvailability.hasNightData) {
+      setWeather(true);
+    }
   } else {
-    // 非今天的數據使用 setWeather
     setWeather(false);
-
     info.addEventListener("mouseenter", () => setWeather(true));
     info.addEventListener("mouseleave", () => setWeather(false));
   }
@@ -258,18 +279,24 @@ function displayWeekWeather(data, isNight = false) {
       isToday
     );
 
-    //如果是最一個元素，拿掉下底線
-    if (index === weatherElement.length - 1) {
-      infoEL.style.borderBottom = "none";
-    }
+    if (infoEL) {
+      //如果是最一個元素，拿掉下底線
+      if (index === weatherElement.length - 1) {
+        infoEL.style.borderBottom = "none";
+      }
 
-    weatherContainer.appendChild(infoEL);
+      weatherContainer.appendChild(infoEL);
+    }
   });
 }
 
 // 顯示天氣資料
 function displayWeather(dayData, weekData) {
-  if (!dayData || !weekData) return;
+  const todayContainer = document.querySelector(".today_weather");
+  if (!dayData || !weekData) {
+    todayContainer.textContent = "暫無天氣資料";
+    return;
+  }
 
   //Today Weather部分
   //擷取資料
@@ -286,6 +313,22 @@ function displayWeather(dayData, weekData) {
     { Wx },
     { WeatherDescription },
   ] = weatherElement;
+
+  // 檢查關鍵數據是否為 null
+  const hasNullData = [
+    avgTemp.value,
+    avgWS.value,
+    avgPoP.value,
+    Wx[0].value,
+    Wx[0].code,
+  ].some((value) => value === null);
+
+  if (hasNullData) {
+    // 如果有 null 數據，顯示暫無天氣資料
+    todayContainer.className = "weather_error";
+    todayContainer.textContent = "暫無天氣資料";
+    return;
+  }
 
   //計算目前是禮拜幾
   const dayOfWeek = getDayOfWeek(date);
@@ -401,6 +444,9 @@ async function fetchWeatherData(countyName) {
     const weekResults = await weekResponse.json();
 
     if (!dayResponse.ok) {
+      const todayContainer = document.querySelector(".today_weather");
+      todayContainer.className = "weather_error";
+      todayContainer.textContent = "暫無天氣資料";
       throw new Error(dayResults.message || "獲取日天氣數據失敗");
     }
 
