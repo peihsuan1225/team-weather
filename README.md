@@ -18,7 +18,7 @@
 - 點擊 24 小時雨量按鈕，呈現指定區域各測站累積雨量
 - 雨量資訊將同步顯示在地圖
 
-![Website](./static/asset/3db49651-21e5-46cb-ac6e-b0f844e2defa.gif "網站功能展示")
+![Website](./static/asset/ee6a796a-70ec-4a3b-a756-631cf8673d2a.gif "網站功能展示")
 
 ---
 
