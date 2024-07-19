@@ -294,7 +294,6 @@ function displayWeekWeather(data, isNight = false) {
 function displayWeather(dayData, weekData) {
   const todayContainer = document.querySelector("#today_weather");
   // 檢查 todayContainer 是否存在
-  console.log(todayContainer);
   if (!todayContainer) {
     console.error("Cannot find .today_weather element");
     return; // 如果元素不存在，提前退出函數
@@ -322,15 +321,6 @@ function displayWeather(dayData, weekData) {
     { WeatherDescription },
   ] = weatherElement;
 
-  // 檢查關鍵數據是否為 null
-  const hasNullData = [
-    avgTemp.value,
-    avgWS.value,
-    avgPoP.value,
-    Wx[0].value,
-    Wx[0].code,
-  ].some((value) => value === null);
-
   //計算目前是禮拜幾
   const dayOfWeek = getDayOfWeek(date);
 
@@ -348,8 +338,18 @@ function displayWeather(dayData, weekData) {
   locationEL.textContent = locationName;
   dateEL.textContent = `${date} ${dayOfWeek}`;
 
-  //檢查 Wx陣列中的value是不是null，如果是null就顯示無資料
-  const validWx = Wx.find((item) => item.value !== null)?.value || "無天氣資訊";
+  const validWxItem = Wx.find(
+    (item) => item.value !== null && item.code !== "None"
+  );
+  let validWx, validWxCode, validWxTime, isNight;
+
+  if (validWxItem) {
+    validWx = validWxItem.value;
+    validWxCode = validWxItem.code;
+    isNight = validWxItem.time === "night";
+    validWxTime = isNight ? "晚上" : "白天";
+  }
+
   wxEL.textContent = validWx;
 
   //動畫遞增溫度數字效果
@@ -361,9 +361,7 @@ function displayWeather(dayData, weekData) {
   rainEL.textContent = `RAIN |  ${avgPoP.value}%`;
 
   //用 Wx code與icon相對照
-  //檢查 Wx陣列中的code是不是null，如果是null就顯示無資料
-  const validWxCode = Wx.find((item) => item.code !== "None")?.code || "";
-  weatherIconEL.data = getWeatherIcon(validWxCode);
+  weatherIconEL.data = getWeatherIcon(validWxCode, isNight);
 
   //顯示未來一週天氣
   displayWeekWeather(weekData);
@@ -446,7 +444,7 @@ async function fetchWeatherData(countyName) {
 
     if (!dayResponse.ok) {
       const todayContainer = document.querySelector("#today_weather");
-      todayContainer.className = "weather_error";
+      todayContainer.classList.add("weather_error");
       todayContainer.textContent = "暫無天氣資料";
       throw new Error(dayResults.message || "獲取日天氣數據失敗");
     }
