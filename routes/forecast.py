@@ -9,6 +9,7 @@ import aiohttp
 
 router = APIRouter()
 
+
 def get_date(days_offset=0):
     tz = timezone(timedelta(hours=+8))
     date = datetime.now(tz) + timedelta(days=days_offset)
@@ -19,10 +20,10 @@ def get_values(official_response, element_code):
     values = []
     for location in official_response["records"]["locations"][0]["location"]:
         for weatherElement in location["weatherElement"]:
-                if weatherElement["elementName"] == element_code:
-                    for time in weatherElement["time"]:
-                        for elementValue in time["elementValue"]:
-                            values.append(elementValue["value"])
+            if weatherElement["elementName"] == element_code:
+                for time in weatherElement["time"]:
+                    for elementValue in time["elementValue"]:
+                        values.append(elementValue["value"])
     if element_code == "Wx":
         if len(values) == 2:
             values.insert(0, None)
@@ -77,18 +78,20 @@ async def fetch(session, url):
     async with session.get(url) as response:
         return await response.text()
 
+
 async def get_official_response(day_offset, locationName, elements):
     date = get_date(days_offset=day_offset)
     timeFrom = date + "T00:00:00"
     timeTo = get_date(days_offset=day_offset + 1) + "T00:00:00"
     url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWA-F75AC89B-4BC1-49EC-B310-A79E92016825&elementName={
         elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
-    
+
     async with aiohttp.ClientSession() as session:
         response_text = await fetch(session, url)
         # print("API Response Text:", response_text)
 
         return json.loads(response_text)
+
 
 @router.get("/api/daily/forecast/{locationName}")
 async def get_forecast(locationName: str):
@@ -119,7 +122,8 @@ async def get_forecast(locationName: str):
         avg_WS = get_avg_value(official_response, "WS")
         UVI = get_avg_value(official_response, "UVI")
         Wx = get_avg_value(official_response, "Wx")
-        WeatherDescription = get_avg_value(official_response, "WeatherDescription")
+        WeatherDescription = get_avg_value(
+            official_response, "WeatherDescription")
 
         if UVI[0] == None:
             UVI[0] = UVI[0]
@@ -243,8 +247,8 @@ async def get_forecast(locationName: str):
             }
         }
 
-
-        tasks = [get_official_response(day_offset, locationName, elements) for day_offset in range(7)]
+        tasks = [get_official_response(
+            day_offset, locationName, elements) for day_offset in range(7)]
         responses = await asyncio.gather(*tasks)
 
         for day_offset, official_response in enumerate(responses):

@@ -292,7 +292,15 @@ function displayWeekWeather(data, isNight = false) {
 
 // 顯示天氣資料
 function displayWeather(dayData, weekData) {
-  const todayContainer = document.querySelector(".today_weather");
+  const todayContainer = document.querySelector("#today_weather");
+  // 檢查 todayContainer 是否存在
+  console.log(todayContainer);
+  if (!todayContainer) {
+    console.error("Cannot find .today_weather element");
+    return; // 如果元素不存在，提前退出函數
+  }
+
+  // 檢查資料是否存在
   if (!dayData || !weekData) {
     todayContainer.textContent = "暫無天氣資料";
     return;
@@ -322,13 +330,6 @@ function displayWeather(dayData, weekData) {
     Wx[0].value,
     Wx[0].code,
   ].some((value) => value === null);
-
-  if (hasNullData) {
-    // 如果有 null 數據，顯示暫無天氣資料
-    todayContainer.className = "weather_error";
-    todayContainer.textContent = "暫無天氣資料";
-    return;
-  }
 
   //計算目前是禮拜幾
   const dayOfWeek = getDayOfWeek(date);
@@ -444,7 +445,7 @@ async function fetchWeatherData(countyName) {
     const weekResults = await weekResponse.json();
 
     if (!dayResponse.ok) {
-      const todayContainer = document.querySelector(".today_weather");
+      const todayContainer = document.querySelector("#today_weather");
       todayContainer.className = "weather_error";
       todayContainer.textContent = "暫無天氣資料";
       throw new Error(dayResults.message || "獲取日天氣數據失敗");
