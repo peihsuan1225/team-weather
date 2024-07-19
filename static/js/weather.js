@@ -37,10 +37,10 @@ const weatherIconMapping = {
   14: "/static/asset/晴短暫陣雨.svg",
 
   // 雷陣雨
-  15: "/static/asset/雷陣雨.svg",
-  16: "/static/asset/雷陣雨.svg",
-  17: "/static/asset/雷陣雨.svg",
-  18: "/static/asset/雷陣雨.svg",
+  15: "/static/asset/晴午後短暫雷陣雨.svg",
+  16: "/static/asset/晴午後短暫雷陣雨.svg",
+  17: "/static/asset/晴午後短暫雷陣雨.svg",
+  18: "/static/asset/晴午後短暫雷陣雨.svg",
 
   // 晴午後短暫雷陣雨
   19: "/static/asset/晴午後短暫雷陣雨.svg",
@@ -393,8 +393,8 @@ async function fetchWeatherData(countyName) {
 
   try {
     const [dayResponse, weekResponse] = await Promise.all([
-      fetch(`/api/daily/forecast/${countyName}`),
-      fetch(`/api/weekly/forecast/${countyName}`),
+      fetch(`http://52.9.113.1:8001/api/daily/forecast/${countyName}`),
+      fetch(`http://52.9.113.1:8001/api/weekly/forecast/${countyName}`),
     ]);
 
     const dayResults = await dayResponse.json();
