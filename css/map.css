@@ -1,7 +1,0 @@
-/* 記得把背景色拿掉 */
-#map-container {
-  background-color: var(--secondary);
-  width: 1000px;
-  height: 800px;
-  margin: 10px;
-}
