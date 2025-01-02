@@ -16,15 +16,21 @@ def get_date(days_offset=0):
     return date.strftime('%Y-%m-%d')
 
 
-def get_values(official_response, element_code):
+def get_values(official_response, element_name):
     values = []
-    for location in official_response["records"]["locations"][0]["location"]:
-        for weatherElement in location["weatherElement"]:
-            if weatherElement["elementName"] == element_code:
-                for time in weatherElement["time"]:
-                    for elementValue in time["elementValue"]:
-                        values.append(elementValue["value"])
-    if element_code == "Wx":
+    for location in official_response["records"]["Locations"][0]["Location"]:
+        for weatherElement in location["WeatherElement"]:
+            if weatherElement["ElementName"] == element_name:
+                for time in weatherElement["Time"]:
+                    for elementValue in time["ElementValue"]:
+                        if element_name == "最低溫度" and "MinTemperature" in elementValue:
+                            values.append(elementValue["MinTemperature"])
+                        elif element_name == "最高溫度" and "MaxTemperature" in elementValue:
+                            values.append(elementValue["MaxTemperature"])
+                        elif element_name == "天氣現象":
+                            values.append(elementValue["Weather"])
+                            values.append(elementValue["WeatherCode"])    
+    if element_name == "天氣現象":
         if len(values) == 2:
             values.insert(0, None)
             values.insert(1, None)
@@ -34,25 +40,33 @@ def get_values(official_response, element_code):
     return values
 
 
-def get_avg_value(official_response, element_code):
+def get_avg_value(official_response, element_name):
     values = []
-    special_process = ["WS", "UVI", "Wx", "WeatherDescription"]
-    for location in official_response["records"]["locations"][0]["location"]:
-        for weatherElement in location["weatherElement"]:
-            if weatherElement["elementName"] == element_code:
-                for time in weatherElement["time"]:
-                    for elementValue in time["elementValue"]:
-                        if element_code not in special_process:
-                            values.append(
-                                Decimal(elementValue["value"]))
-                        elif element_code == "WS":
-                            if elementValue["measures"] == "公尺/秒":
-                                values.append(
-                                    Decimal(elementValue["value"]))
-                        elif element_code in ["UVI", "Wx", "WeatherDescription"]:
-                            values.append(elementValue["value"])
-
-    if element_code in ["UVI", "Wx", "WeatherDescription"]:
+    # special_process = ["風速", "紫外線指數", "天氣現象", "天氣預報綜合描述"]
+    for location in official_response["records"]["Locations"][0]["Location"]:
+        for weatherElement in location["WeatherElement"]:
+            if weatherElement["ElementName"] == element_name:
+                for time in weatherElement["Time"]:
+                    for elementValue in time["ElementValue"]:
+                        if element_name == "平均溫度" and "Temperature" in elementValue:
+                            values.append(Decimal(elementValue["Temperature"]))
+                        elif element_name == "最低溫度" and "MinTemperature" in elementValue:
+                            values.append(Decimal(elementValue["MinTemperature"]))
+                        elif element_name == "最高溫度" and "MaxTemperature" in elementValue:
+                            values.append(Decimal(elementValue["MaxTemperature"]))
+                        elif element_name == "12小時降雨機率" and "ProbabilityOfPrecipitation" in elementValue:
+                            values.append(Decimal(elementValue["ProbabilityOfPrecipitation"]))
+                        elif element_name == "風速" and "WindSpeed" in elementValue:
+                            values.append(Decimal(elementValue["WindSpeed"]))
+                        elif element_name == "紫外線指數" :
+                            values.append(elementValue["UVIndex"])
+                            values.append(elementValue["UVExposureLevel"])
+                        elif element_name == "天氣現象":
+                            values.append(elementValue["Weather"])
+                            values.append(elementValue["WeatherCode"])
+                        elif element_name == "天氣預報綜合描述" and "WeatherDescription" in elementValue:
+                            values.append(elementValue["WeatherDescription"])
+    if element_name in ["紫外線指數", "天氣現象", "天氣預報綜合描述"]:
         if len(values) == 2:
             values.insert(0, None)
             values.insert(1, None)
@@ -83,8 +97,7 @@ async def get_official_response(day_offset, locationName, elements):
     date = get_date(days_offset=day_offset)
     timeFrom = date + "T00:00:00"
     timeTo = get_date(days_offset=day_offset + 1) + "T00:00:00"
-    url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWA-F75AC89B-4BC1-49EC-B310-A79E92016825&elementName={
-        elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
+    url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWA-F75AC89B-4BC1-49EC-B310-A79E92016825&ElementName={elements}&LocationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
 
     async with aiohttp.ClientSession() as session:
         response_text = await fetch(session, url)
@@ -105,25 +118,25 @@ async def get_forecast(locationName: str):
         }
         return JSONResponse(content=result, status_code=400)
     try:
-        elements = "T,MinT,UVI,MaxT,PoP12h,Wx,WeatherDescription,WS"
+        # elements = "T,MinT,UVI,MaxT,PoP12h,Wx,WeatherDescription,WS"
+        elements = "平均溫度,最低溫度,紫外線指數,最高溫度,12小時降雨機率,天氣現象,天氣預報綜合描述,風速"
         date = get_date()
         timeFrom = date + "T00:00:00"
         timeTo = get_date(days_offset=1) + "T00:00:00"
-        url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWA-F75AC89B-4BC1-49EC-B310-A79E92016825&elementName={
-            elements}&locationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
+        url = f'https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-091?Authorization=CWA-F75AC89B-4BC1-49EC-B310-A79E92016825&ElementName={elements}&LocationName={locationName}&timeFrom={timeFrom}&timeTo={timeTo}'
         x = requests.get(url)
         official_response = json.loads(x.text)
-        # print(official_response)
+        # print("Official Response:", official_response)
 
-        avg_temp = get_avg_value(official_response, "T")
-        min_temp = get_avg_value(official_response, "MinT")
-        max_temp = get_avg_value(official_response, "MaxT")
-        avg_PoP = get_avg_value(official_response, "PoP12h")
-        avg_WS = get_avg_value(official_response, "WS")
-        UVI = get_avg_value(official_response, "UVI")
-        Wx = get_avg_value(official_response, "Wx")
+        avg_temp = get_avg_value(official_response, "平均溫度")
+        min_temp = get_avg_value(official_response, "最低溫度")
+        max_temp = get_avg_value(official_response, "最高溫度")
+        avg_PoP = get_avg_value(official_response, "12小時降雨機率")
+        avg_WS = get_avg_value(official_response, "風速")
+        UVI = get_avg_value(official_response, "紫外線指數")
+        Wx = get_avg_value(official_response, "天氣現象")
         WeatherDescription = get_avg_value(
-            official_response, "WeatherDescription")
+            official_response, "天氣預報綜合描述")
 
         if UVI[0] == None:
             UVI[0] = UVI[0]
@@ -239,7 +252,7 @@ async def get_forecast(locationName: str):
         }
         return JSONResponse(content=result, status_code=400)
     try:
-        elements = "MinT,MaxT,Wx"
+        elements = "最低溫度,最高溫度,天氣現象"
         response_data = {
             "result": {
                 "locationName": locationName,
@@ -254,9 +267,9 @@ async def get_forecast(locationName: str):
         for day_offset, official_response in enumerate(responses):
             date = get_date(days_offset=day_offset)
 
-            min_temp = get_values(official_response, "MinT")
-            max_temp = get_values(official_response, "MaxT")
-            Wx = get_values(official_response, "Wx")
+            min_temp = get_values(official_response, "最低溫度")
+            max_temp = get_values(official_response, "最高溫度")
+            Wx = get_values(official_response, "天氣現象")
 
             if min_temp[0] == None:
                 min_temp[0] = min_temp[0]
